@@ -1,0 +1,60 @@
+ .otp-container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 30px 25px;
+    background-color: #fdfdfd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    text-align: center;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .otp-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .otp-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .otp-container label {
+    text-align: left;
+    font-weight: 500;
+    color: #444;
+  }
+
+  .otp-container input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    outline: none;
+  }
+
+  .otp-container input[type="text"]:focus {
+    border-color: #5e9ed6;
+  }
+
+  .otp-container button {
+    padding: 10px;
+    background-color: #5e9ed6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .otp-container button:hover {
+    background-color: #467fb2;
+  }
+
+  .otp-container p {
+    margin-top: -10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }

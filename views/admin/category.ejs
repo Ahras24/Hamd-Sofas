@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin- Category Management</title>
+    <link rel="icon" type="image/png" href="/public/images/admin-favicon.jpg">
+    <link rel="stylesheet" href="/public/admin/css/category.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+</head>
+<body>
+
+  <!-- Sidebar -->
+     <%- include("../../views/partials/admin/sidebar") %>
+
+     <% if (success_msg && success_msg.length > 0) { %>
+      <script>
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: '<%= success_msg %>',
+          confirmButtonColor: '#3085d6',
+          timer: 3000,
+          showConfirmButton: false
+        });
+      </script>
+    <% } %>
+    
+    <% if (error_msg && error_msg.length > 0) { %>
+      <%= error_msg %>
+      <script>
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: '<%= error_msg %>',
+          confirmButtonColor: '#d33',
+          timer: 3000, 
+          showConfirmButton: false
+        });
+      </script>
+    <% } %>
+    
+
+     <div class="container-category">
+      <div class="category-header">
+        <h1>CATEGORY MANAGEMENT</h1>
+        <div class="header-actions">
+          <div class="add-category-box" onclick="openAddModal()">
+            <span>+ Add Category</span>
+          </div>
+    
+          <!-- Search Form-->
+          <form action="/admin/category" method="get" class="search-form">
+            <input type="text" id="searchInput" name="search" placeholder="Search category..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
+            <button type="submit">Search</button>
+            <button type="button" id="cancel-button">Cancel</button>
+          </form>
+        </div>
+        <% if(typeof totalCategories !== 'undefined') { %>
+        <span class="total-products" >
+          Total Categories: <%= totalCategories %>
+        </span>
+        <% } %>
+      </div>
+        
+    
+      <table class="category-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Category Name</th>
+            <th>Image</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (categories.length > 0) { %>
+            <% categories.forEach((category, index) => { %>
+              <tr>
+                <td><%= (currentPage-1) * limit + index + 1 %></td>
+                <td><%= category.name %></td>
+                <td><img src="<%= category.imageUrl || '/public/images/placeholder.jpg' %>" alt="<%= category.name || 'No Image' %>" width="50"></td>
+                <td>
+                  <span class="status <%= category.isListed ? 'Listed' : 'Unlisted' %>">
+                    <%= category.isListed ? 'Listed' : 'Unlisted' %>
+                  </span>
+                </td>
+                <td>
+                  <button 
+                  class="btn edit" 
+                  onclick="openEditModal('<%= category._id %>', '<%= category.name  %>', '<%= category.imageUrl  %>', '<%= category.isListed %>')">
+                  Edit
+                </button>                 
+                 <form id="toggle-form-<%= category._id %>" action="/admin/category/toggle-list/<%= category._id %>?_method=PUT" method="POST" style="display:inline;">
+                    <input type="hidden" name="_method" value="PUT">
+                    <button type="button" class="btn <%= category.isListed ? 'delete' : 'edit' %>" onclick="confirmToggle('<%= category._id %>', '<%= category.isListed %>')">
+                      <%= category.isListed ? 'Unlist' : 'List' %>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="5">No categories found.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div class="pagination">
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+              <span class="active"><%= i %></span>
+            <% } else { %>
+              <a href="/admin/category?page=<%= i %>&search=<%= encodeURIComponent(searchQuery) %>"><%= i %></a>
+            <% } %>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+    
+    <!-- Add Category Modal -->
+    <div class="modal" id="addCategoryModal">
+      <div class="modal-content">
+        <span class="close" onclick="closeAddModal()">×</span>
+
+        <h2>Add New Category</h2>
+        <form action="/admin/addCategory" method="POST" enctype="multipart/form-data" onsubmit="return handleAddFormSubmit(event)">
+          <div class="mb-3">
+            <label for="add-name" class="form-label">Category Name</label>
+            <input type="text" class="form-control" name="name" id="add-name" >
+            <span class="name-error" id="add-name-error" style="color: red;"></span>
+          </div>
+          <div class="mb-3">
+            <label for="add-image" class="form-label">Category Image</label>
+            <input type="file" class="form-control" name="image" id="add-image" accept="image/jpeg,image/png" >
+            <span id="add-image-error" style="color: red; display: none;"></span>
+          </div>
+    
+          <button type="submit" class="save-btn" >Add Category</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div class="modal" id="editCategoryModal">
+      <div class="modal-content">
+        <span class="close" onclick="closeEditModal()" aria-label="Close modal">×</span>
+
+        <h2>Edit Category</h2>
+        <form id="editCategoryForm" method="POST" enctype="multipart/form-data" onsubmit="return handleEditFormSubmit(event)">
+          <div class="mb-3">
+            <label for="edit-name" class="form-label">Category Name</label>
+            <input type="text" class="form-control" name="name" id="edit-name" >
+            <span class="name-error" id="edit-name-error" style="color: red;"></span>
+          </div>
+          <div class="mb-3">
+            <label>Current Image</label>
+            <div class="current-image">
+              <img id="edit-current-image" src="" alt="Current Image" width="100">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="edit-image" class="form-label">New Image (Optional)</label>
+            <input type="file" class="form-control" name="image" id="edit-image" accept="image/jpeg,image/png">
+          </div>
+        
+          <button type="submit" class="btn save-btn">Update Category</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+
+function openAddModal() {
+    document.getElementById("addCategoryModal").style.display = "block";
+    clearErrorMessage("add-name-error");
+    clearErrorMessage("add-image-error");
+  }
+
+  function closeAddModal() {
+    document.getElementById("addCategoryModal").style.display = "none";
+  }
+
+  function openEditModal(id, name, imageUrl,isListed) {
+    document.getElementById("edit-name").value = name ||'';
+    document.getElementById("edit-current-image").src = imageUrl || '/public/images/placeholder.jpg';
+
+    clearErrorMessage("edit-name-error");
+    
+    const form = document.getElementById("editCategoryForm");
+    form.action = `/admin/category/edit/${id}`;
+   
+    
+    document.getElementById("editCategoryModal").style.display = "block";
+  }
+
+  function closeEditModal() {
+    document.getElementById("editCategoryModal").style.display = "none";
+  }
+
+  // Search cancel
+  document.getElementById("cancel-button").addEventListener("click", function () {
+  window.location.href = "/admin/category"; 
+});
+
+// Validation
+function handleAddFormSubmit(event) {
+  const name = document.getElementById("add-name").value.trim();
+  const image = document.getElementById('add-image').files[0];
+
+  let isValid = true;
+
+  if (!validateName(name, "add-name-error")) {
+    isValid = false;
+  }
+
+  clearErrorMessage("add-image-error");
+  if(!image){
+    displayErrorMessage("add-image-error","Please select an image");
+    isValid = false;
+  }
+
+  if(!isValid){
+    event.preventDefault();
+    return false;
+  }
+  return true;
+}
+
+function handleEditFormSubmit(event) {
+  const name = document.getElementById("edit-name").value.trim();
+  if (!validateName(name, "edit-name-error")) {
+    event.preventDefault();
+    return false;
+  }
+  return true;
+}
+
+function validateName(name, errorId) {
+  clearErrorMessage(errorId);
+  if (!name) {
+    displayErrorMessage(errorId, "Please enter a category name");
+    return false;
+  }
+  if (!/^[a-zA-Z\s]+$/.test(name)) {
+    displayErrorMessage(errorId, "Only letters and spaces are allowed");
+    return false;
+  }
+  return true;
+}
+
+function displayErrorMessage(elementId, message) {
+  const el = document.getElementById(elementId);
+  if (el) {
+    el.innerText = message;
+    el.style.display = "block";
+  }
+}
+function clearErrorMessage(elementId) {
+  const el = document.getElementById(elementId);
+  if (el) {
+    el.innerText = "";
+    el.style.display = "none";
+  }
+}
+
+      function confirmToggle(categoryId, isListed) {
+        const listed = isListed === 'true';
+
+    Swal.fire({
+      title: listed ? 'Unlist this category?' : 'List this category?',
+      text: listed 
+        ? 'The category will no longer be visible to users.' 
+        : 'The category will be visible to users again.',
+      icon: listed ?  'warning' : "success",
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: listed ? 'Yes, Unlist' : 'Yes, List'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById(`toggle-form-${categoryId}`).submit();
+      }
+    });
+  }
+
+  if (window.location.search.includes('success_msg') || window.location.search.includes('error_msg')) {
+    const url = new URL(window.location);
+    url.searchParams.delete('success_msg');
+    url.searchParams.delete('error_msg');
+    window.history.replaceState({}, document.title, url.pathname); // Remove query params without reloading
+  }
+
+    </script>
+
+</body>
+  </html>
+     

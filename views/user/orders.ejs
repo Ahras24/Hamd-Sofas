@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Orders Page</title>
+  <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+  <link rel="stylesheet" href="/public/user/css/orders.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+</head>
+<body>
+
+  <%- include("../../views/partials/user/navbar")%>
+
+  <div class="order-container">
+    <h2>MY ORDERS</h2>
+
+<!-- Search Form -->
+ <form action="/user/orders" method="GET" class="order-search-form">
+  <input type="text" name="search" placeholder="Search by Order ID or Product Name" value="<%= typeof search !== 'undefined' ? search : '' %>" />
+  <button type="submit">Search</button>
+  <a href="/user/orders" class="clear-btn">Clear</a>
+</form>
+
+    <% if (orders.length === 0) { %>
+      <p>No Orders Found.</p>
+    <% } else { %>
+        <% orders.forEach(order => { %>
+    <div class="order-card">
+      <div class="order-left">
+        <div class="product-thumb">
+          <% if (order.items[0] && order.items[0].product) { %>
+          <img src="<%= order.items[0].product.productImage[0] %>" alt="Product Image">
+          <% } else { %>
+            <img src="/images/placeholder.png" alt="Product Not Found">
+            <% } %>
+        </div>
+        
+        <div class="order-info">
+          <p><strong>Product:</strong>
+            <% if (order.items.length > 0 && order.items[0].product) { %>
+            <%= order.items[0].product.productName %>
+             <% if (order.items.length > 1) { %>
+              <span class="more-items">+ <%= order.items.length - 1 %> more item(s)</span>
+            <% } %>
+            <% } else { %>
+              <em>No products found</em>
+              <% } %>
+          </p>
+          
+          <p><strong>Order ID:</strong> <%= order.customId %> </p>
+          <p><strong>Date:</strong> <%= order.createdAt.toLocaleDateString() %> </p>
+          <p><strong>Status:</strong>
+            <span class="status <%= order.status.toLowerCase().replace(/\s/g, '-') %>">
+              <%= order.status %> 
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div class="order-actions">
+        <a href="/user/order-details/<%= order.customId %>" class="view-btn">View Details</a>
+
+      <% if(order.status === 'failed') { %>
+       <button class="retryPaymentBtn" data-order-id="<%= order._id %>">Retry Payment</button>
+      <% } %>
+
+          <% if( order.status !== 'cancelled' && order.status !== 'returned' && order.status !== 'failed') { %>
+        <a href="/user/order/<%= order.customId %>/invoice" class="invoice-btn">Download Invoice</a>
+        <% } %>
+      </div>
+    </div>
+   <% }) %>
+  <% } %>
+</div>
+
+<!-- Pagination Controls -->
+<% if (totalPages > 1) { %>
+  <div class="pagination">
+    <% if (currentPage > 1) { %>
+      <a href="/user/orders?page=<%= currentPage - 1 %>&search=<%= search %>" class="pagination-btn">Prev</a>
+    <% } %>
+
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <a href="/user/orders?page=<%= i %>&search=<%= search %>" class="pagination-btn <%= currentPage === i ? 'active' : '' %>">
+        <%= i %>
+      </a>
+    <% } %>
+
+    <% if (currentPage < totalPages) { %>
+      <a href="/user/orders?page=<%= currentPage + 1 %>&search=<%= search %>" class="pagination-btn">Next</a>
+    <% } %>
+  </div>
+<% } %>
+
+   <%- include("../../views/partials/user/footer")%> 
+
+   <script>
+
+    document.querySelectorAll('.retryPaymentBtn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const orderId = btn.dataset.orderId;
+
+    try {
+      const res = await fetch(`/user/retry-payment/${orderId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'Retry setup failed');
+
+      const options = {
+        key: "<%= RAZORPAY_KEY_ID %>",
+        amount: data.order.amount,
+        currency: "INR",
+        name: "HAMD SOFAS",
+        order_id: data.order.id,
+
+        handler: async function (response) {
+          const verifyRes = await fetch('/user/retry-payment-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...response,
+              localOrderId: orderId
+            })
+          });
+
+          const result = await verifyRes.json();
+          if (result.success) {
+            window.location.href = `/user/order-success/${result.customId}`;
+          } else {
+            window.location.href = `/user/order-failure/${result.customId}`;
+          }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+
+      rzp.on('payment.failed', async function (response) {
+        console.error("Retry Payment Failed:", response.error);
+        window.location.href = '/user/order-failure';
+      });
+
+      rzp.open();
+    } catch (err) {
+      console.error('Retry Payment Error:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Retry Failed',
+        text: err.message,
+        confirmButtonColor: '#9CAEA9'
+      });
+    }
+  });
+});
+    
+
+   </script>
+
+
+</body>
+</html>

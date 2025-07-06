@@ -1,0 +1,108 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Main wrapper if you have content before footer */
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Footer should stick to bottom */
+  .footer {
+    background-color: #9CAEA9;
+    color: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 40px 20px 20px;
+    width: 100%;
+    margin-top: auto; /* pushes footer to bottom */
+    box-sizing: border-box;
+  }
+  
+  .footer-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #555;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .footer-column {
+    min-width: 180px;
+    margin-bottom: 20px;
+  }
+  
+  .footer-column h4 {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .footer-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .footer-column ul li {
+    margin-bottom: 8px;
+  }
+  
+  .footer-column ul li a {
+    text-decoration: none;
+    color: #000;
+    transition: color 0.3s;
+  }
+  
+  .footer-column ul li a:hover {
+    color: #444;
+  }
+  
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .logo-section .sofa-icon {
+    height: 25px;
+  }
+  
+  .social-icons a {
+    margin-left: 15px;
+    font-size: 18px;
+    color: #000;
+    transition: color 0.3s;
+  }
+  
+  .social-icons a:hover {
+    color: #444;
+  }
+  
+  @media (max-width: 768px) {
+    .footer-container {
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+  
+    .footer-bottom {
+      flex-direction: column;
+      text-align: center;
+      gap: 10px;
+    }
+  }
+  

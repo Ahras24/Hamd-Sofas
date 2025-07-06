@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Successful Page</title>
+  <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+  <link rel="stylesheet" href="/public/user/css/order-success.css"/>
+</head>
+<body>
+
+  <%- include("../../views/partials/user/navbar")%>
+
+  <div class="success-container">
+    <div class="success-box">
+      <h1>Thank You for Your Order! </h1>
+      <p class="message">Your order has been successfully placed.</p>
+      <p class="order-id">Order ID: <strong><%= order.customId %></strong></p>
+
+      <div class="buttons">
+        <a href="/user/order-details/<%= order.customId %>" class="btn btn-order">View Order Details</a>
+        <a href="/user/shop" class="btn btn-shop">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+
+    <%- include("../../views/partials/user/footer")%>
+
+</body>
+</html>

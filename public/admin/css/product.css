@@ -1,0 +1,232 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #e8e3dd;
+    padding: 0;
+  }
+  
+  /* Space for fixed sidebar */
+  .main-content {
+    margin-left: 250px; /* Adjust to your sidebar width */
+    padding: 20px;
+  }
+  
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #9CAEA9;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    color: white;
+  }
+  
+  .add-product-btn {
+    background-color: #137458;
+    color: #9CAEA9;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .add-product-btn:hover {
+    background-color: #537f6c;
+  }
+  
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .product-table th,
+  .product-table td {
+    text-align: left;
+    padding: 12px;
+    border: 1px solid #ccc; 
+
+  }
+  
+  .product-table th {
+    background-color: #9CAEA9;
+    color: white;
+  }
+  
+  .product-table img {
+    border-radius: 5px;
+  }
+  
+  .btn {
+    padding: 6px 10px;
+    margin-right: 5px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  
+  .edit {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .delete {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 500px;
+  }
+  
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+    cursor: pointer;
+  }
+  
+  input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .save-btn {
+    background-color: #9CAEA9;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .save-btn:hover {
+    background-color: #88a69e;
+  }
+
+  .text-danger {
+    color: red;
+    font-size: 0.875em;
+  }
+
+  .block {
+    background-color: #e74c3c !important; /* red */
+    color: white !important;
+    border: none !important;
+  }
+
+  .unblock {
+    background-color: #2ecc71 !important; /* green */
+    color: white !important;
+    border: none !important;
+  }
+
+  .block:hover,
+  .unblock:hover {
+    opacity: 0.9;
+    cursor: pointer;
+  }
+
+  .btn-edit {
+    display: inline-block;
+    background-color: #4CAF50; /* Green */
+    color: white;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-edit:hover {
+    background-color: #089e0f;
+    color: white;
+  }
+  .search-bar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* for responsiveness */
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-bar input[type="text"] {
+  padding: 8px;
+  width: 300px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.btn-search {
+  padding: 8px 16px;
+  background-color: #9CAEA9; /* Sage green */
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-search:hover {
+  background-color: #8A9C99; /* Slightly darker sage */
+}
+
+.btn-clear {
+  padding: 8px 16px;
+  background-color: #9CAEA9;
+  border-radius: 4px;
+  text-decoration: none;
+  color: rgb(248, 242, 242);
+  transition: background-color 0.3s ease;
+}
+
+.btn-clear:hover {
+  background-color: #bbb;
+}
+
+.total-products {
+  font-weight: bold;
+  color: white;
+  background-color: #9CAEA9; /* Sage green background */
+  padding: 6px 12px;
+  border-radius: 12px;
+  margin-left: 20px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  user-select: none;
+}

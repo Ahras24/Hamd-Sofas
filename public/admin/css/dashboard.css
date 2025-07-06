@@ -1,0 +1,62 @@
+  body {
+    background-color: #e8e3dd;
+    color: #2B2B2B;
+  }
+
+  .main-content {
+    margin-left: 250px;
+    background-color: #e8e3dd;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .dashboard-header h2 {
+    color: #2B2B2B;
+  }
+
+  .dashboard-header p {
+    color: #2B2B2B;
+    opacity: 0.8;
+  }
+
+  .card {
+    background-color: #ffffff;
+    border: 1px solid #9CAEA9;
+    border-radius: 10px;
+  }
+
+  .card-header {
+    background-color: #9CAEA9;
+    color: #2B2B2B;
+    font-weight: bold;
+  }
+
+  .list-group-item {
+    background-color: #ffffff;
+    color: #2B2B2B;
+    border: none;
+    border-bottom: 1px solid #eee;
+  }
+
+  .badge {
+    background-color: #9CAEA9;
+    color: #2B2B2B;
+  }
+
+  .form-select {
+    background-color: #ffffff;
+    color: #2B2B2B;
+    border: 1px solid #9CAEA9;
+  }
+
+  .alert-success {
+    background-color: #9CAEA9;
+    color: #2B2B2B;
+    border: none;
+  }
+
+  canvas {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 1rem;
+  }

@@ -1,0 +1,23 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 250px; 
+    right: 0px;/* aligns with sidebar */
+    width: calc(100% - 250px); /* takes full width except sidebar */
+    height: 60px;
+    background-color: #9caea9; /* Sage Green */
+    padding: 15px 20px;
+    color: rgb(14, 14, 14);
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1001;
+}
+

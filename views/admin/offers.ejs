@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Offer Management</title>
+    <link rel="icon" type="image/png" href="/public/images/admin-favicon.jpg">
+    <link rel="stylesheet" href="/public/admin/css/offers.css">
+</head>
+<body>
+
+    <%- include("../../views/partials/admin/sidebar") %>
+
+<div class="offer-container">
+
+  <!-- PRODUCT OFFERS -->
+  <div class="product-offer-section">
+    <h2>Product-Level Offers</h2>
+    <form action="/admin/offers/product-offer" method="POST" class="offer-form" onsubmit="return validateProductOfferForm()">
+     <div class="input-group">
+      <select name="productId" id="productId">
+        <option value="">-- Select Product --</option>
+        <% products.forEach(product => { %>
+          <option value="<%= product._id %>"><%= product.productName %></option>
+        <% }) %>
+      </select>
+      <span class="error" id="productError"></span>
+     </div>
+
+    <div class="input-group">
+      <input type="number" name="discountPercentage" placeholder="Discount %" id="productDiscount">
+      <span class="error" id="discountError"></span>
+    </div>
+
+    <div class="input-group">
+      <label for="startDate">Start Date</label>
+      <input type="date" name="startDate" id="productStart" >
+      <span class="error" id="startDateError"></span>
+    </div>
+
+    <div class="input-group">
+      <label for="endDate">End Date</label>
+      <input type="date" name="endDate" id="productEnd" >
+      <span class="error" id="endDateError"></span>
+    </div>
+
+    <div class="input-group">
+      <button type="submit">Create Product Offer</button>
+    </div>
+    </form>
+
+    <table class="offer-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product</th>
+          <th>Discount %</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% productOffer.forEach((offer, index) => { %>
+          <tr>
+            <td><%= index + 1 %></td>
+            <td><%= offer.productId.productName %></td>
+            <td><%= offer.discountPercentage %>%</td>
+            <td><%= offer.startDate.toDateString() %></td>
+            <td><%= offer.endDate.toDateString() %></td>
+            <td>
+              <form action="/admin/offers/delete-product-offer/<%= offer._id %>" method="POST" onsubmit="return confirmDelete(event)">
+                <button class="delete-btn" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CATEGORY OFFERS -->
+  <div class="category-offer-section">
+    <h2>Category-Level Offers</h2>
+    <form action="/admin/offers/category-offer" method="POST" class="offer-form" onsubmit="return validateCategoryOfferForm()">
+     <div class="input-group">
+      <select name="categoryId" id="categoryId">
+        <option value="">-- Select Category --</option>
+        <% categories.forEach(category => { %>
+          <option value="<%= category._id %>"><%= category.name %></option>
+        <% }) %>
+      </select>
+      <span class="error" id="catError"></span>
+     </div>
+
+     <div class="input-group">
+      <input type="number" name="discountPercentage" placeholder="Discount %" id="categoryDiscount">
+      <span class="error" id="catDiscountError"></span>
+     </div>
+
+     <div class="input-group">
+      <label for="startDate">Start Date</label>
+      <input type="date" name="startDate" id="categoryStart" >
+      <span class="error" id="catStartError"></span>
+     </div>
+
+     <div class="input-group">
+      <label for="endDate">End Date</label>
+      <input type="date" name="endDate" id="categoryEnd" >
+      <span class="error" id="catEndError"></span>
+     </div>
+
+     <div class="input-group">
+      <button type="submit">Create Category Offer</button>
+     </div>
+    </form>
+
+    <table class="offer-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Category</th>
+          <th>Discount %</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% categoryOffer.forEach((offer, index) => { %>
+          <tr>
+            <td><%= index + 1 %></td>
+            <td><%= offer.categoryId.name %></td>
+            <td><%= offer.discountPercentage %>%</td>
+            <td><%= offer.startDate.toDateString() %></td>
+            <td><%= offer.endDate.toDateString() %></td>
+            <td>
+              <form action="/admin/offers/delete-category-offer/<%= offer._id %>" method="POST" onsubmit="return confirmDelete(event)">
+                <button class="delete-btn" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+   window.addEventListener('DOMContentLoaded', () => {
+    const setDateRestrictions = (startId, endId) => {
+      const startInput = document.getElementById(startId);
+      const endInput = document.getElementById(endId);
+
+      if (!startInput || !endInput) return;
+
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${yyyy}-${mm}-${dd}`;
+
+      // Disallow past date selection
+      startInput.min = todayStr;
+      endInput.min = todayStr;
+
+      // Make end date always ≥ start date
+      startInput.addEventListener('change', () => {
+        endInput.min = startInput.value;
+        if (endInput.value < startInput.value) {
+          endInput.value = startInput.value;
+        }
+      });
+    };
+
+    // Apply to both offer types
+    setDateRestrictions("categoryStart", "categoryEnd");
+    setDateRestrictions("productStart", "productEnd");
+  });
+
+  function validateProductOfferForm() {
+    let isValid = true;
+    const discount = document.getElementById('productDiscount').value;
+    const start = document.getElementById('productStart').value;
+    const end = document.getElementById('productEnd').value;
+    const product = document.getElementById('productId').value;
+
+    document.getElementById('productError').textContent = product ? '' : 'Select a product';
+    document.getElementById('discountError').textContent = (discount && discount <= 100) ? '' : 'Enter a valid discount (0-100)';
+    document.getElementById('startDateError').textContent = start ? '' : 'Enter start date';
+    document.getElementById('endDateError').textContent = end ? '' : 'Enter end date';
+
+    if (!product || !discount || discount > 100 || !start || !end || new Date(start) > new Date(end)) {
+      if (new Date(start) > new Date(end)) document.getElementById('endDateError').textContent = 'End date must be after start date';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function validateCategoryOfferForm() {
+    let isValid = true;
+    const discount = document.getElementById('categoryDiscount').value;
+    const start = document.getElementById('categoryStart').value;
+    const end = document.getElementById('categoryEnd').value;
+    const category = document.getElementById('categoryId').value;
+
+    document.getElementById('catError').textContent = category ? '' : 'Select a category';
+    document.getElementById('catDiscountError').textContent = (discount && discount <= 100) ? '' : 'Enter a valid discount (0-100)';
+    document.getElementById('catStartError').textContent = start ? '' : 'Enter start date';
+    document.getElementById('catEndError').textContent = end ? '' : 'Enter end date';
+
+    if (!category || !discount || discount > 100 || !start || !end || new Date(start) > new Date(end)) {
+      if (new Date(start) > new Date(end)) document.getElementById('catEndError').textContent = 'End date must be after start date';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function confirmDelete(e) {
+    e.preventDefault();
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This offer will be deleted permanently!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#9CAEA9',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        e.target.submit();
+      }
+    });
+    return false;
+  }
+</script>
+
+ <script>
+  <% if (typeof message !== 'undefined' && message) { 
+       const msg = JSON.parse(message); %>
+
+    Swal.fire({
+      icon: '<%= msg.success ? "success" : "error" %>',
+      title: '<%= msg.success ? "Success" : "Error" %>',
+      text: '<%= msg.text %>',
+      timer: 2500,
+      showConfirmButton: false
+    });
+  <% } %>
+</script>
+
+    
+</body>
+</html>

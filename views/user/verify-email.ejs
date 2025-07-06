@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email Page</title>
+    <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+    <link rel="stylesheet" href="/public/user/css/verify-email.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+      <%- include("../../views/partials/user/navbar")%>
+
+<div class="otp-container">
+  <h2>Verify Your Email</h2>
+  <% if (typeof error !== 'undefined') { %>
+    <p style="color:red;"><%= error %></p>
+  <% } %>
+  <form action="/user/verify-email" method="POST">
+    <label for="otp">Enter OTP:</label>
+    <input type="text" name="otp"  />
+        
+    <div style="margin-top: 10px;">
+      <a href="/user/email-resend-otp" style="color: #007bff; text-decoration: underline;">Resend OTP?</a>
+    </div>
+    
+    <button type="submit">Verify</button>
+  </form>
+</div>
+
+
+      <%- include("../../views/partials/user/footer")%>
+
+<% if (success && success.length > 0) { %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      Swal.fire({
+        icon: 'success',
+        title: 'OTP Sent!',
+        text: `<%= success[0] %>`,
+        confirmButtonColor: '#28a745',
+        confirmButtonText: 'OK',
+        timer: 3000,
+        timerProgressBar: true
+      });
+    });
+  </script>
+<% } %>
+
+<% if (error && error.length > 0) { %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `<%= error[0] %>`,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'OK'
+      });
+    });
+  </script>
+<% } %>
+
+<% if (typeof otpError !== 'undefined' && otpError && otpError.length > 0) { %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid OTP',
+        text: `<%= otpError[0] %>`,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Try Again',
+      });
+    });
+  </script>
+<% } %>
+
+    
+</body>
+</html>

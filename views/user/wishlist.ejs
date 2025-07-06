@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wishlist Page</title>
+  <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+  <link rel="stylesheet" href="/public/user/css/wishlist.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+<body>
+
+   <%- include("../../views/partials/user/navbar")%>
+
+<div class="wishlist-container">
+  <h2>My Wishlist</h2>
+  <p>Total items in Wishlist: <%= wishlistCount %></p>
+
+  <div class="wishlist-items">
+    <% if (wishlistItems.length === 0) { %>
+      <p>Your wishlist is empty.</p>
+    <% } else { %>
+      <% wishlistItems.forEach(item => { %>
+        <div class="wishlist-card" data-product-id="<%= item.productId._id %>">
+          
+          <!-- Product Link -->
+          <a href="/user/product-details/<%= item.productId._id %>" class="product-link">
+            <div class="product-img-wrapper">
+              <img src="<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>">
+            </div>
+            <h3><%= item.productId.productName %></h3>
+            <p class="price">
+              <span class="regular-price">₹<%= item.productId.regularPrice.toLocaleString('en-IN') %></span>
+              <span class="sale-price">₹<%= item.productId.salePrice.toLocaleString('en-IN') %></span>
+              <span class="final-price">Now:₹<%= item.productId.finalPrice.toLocaleString('en-IN') %></span>
+            </p>
+          </a>
+
+        <div class="product-actions">
+           <button class="add-cart-btn" onclick="addToCart('<%= item.productId._id %>')">Move to Cart</button>
+        </div>
+
+          <!-- Remove from Wishlist -->
+          <button class="remove-wishlist-btn">Remove from Wishlist</button>
+
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+
+<%- include("../../views/partials/user/footer")%>
+
+
+
+<script>
+
+// Remove button
+  document.querySelectorAll('.remove-wishlist-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+      const card = button.closest('.wishlist-card');
+      const productId = card.getAttribute('data-product-id');
+
+      const result = await Swal.fire({
+        title: 'Remove from Wishlist?',
+        text: 'Are you sure you want to remove this product?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#9CAEA9',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove it!'
+      });
+
+      if (result.isConfirmed) {
+        fetch('/user/remove-wishlist/' + productId, {
+          method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Removed!',
+              text: data.message,
+              timer: 1200,
+              showConfirmButton: false
+            });
+            // Remove element from DOM
+            card.remove();
+          } else {
+            throw new Error(data.message);
+          }
+        })
+        .catch(err => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops!',
+            text: err.message || 'Something went wrong.',
+          });
+        });
+      }
+    });
+  });
+
+
+function addToCart(productId) {
+    fetch('/user/add-to-cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops!',
+          text: data.error
+        });
+      } else {
+        Swal.fire({
+          icon: 'success',
+          title: 'Added to Cart!',
+          text: 'The product was added successfully.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        setTimeout(() => window.location.href = '/user/cart', 1500);
+      }
+    })
+    .catch(err => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed!',
+        text: 'Something went wrong.'
+      });
+    });
+  }
+
+</script>
+
+</body>
+</html>

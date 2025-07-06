@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Signup Page</title>
+  <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+  <script src="https://kit.fontawesome.com/1517a3fa39.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/public/user/css/signup.css">
+</head>
+<body>
+
+
+  <%- include("../../views/partials/user/navbar")%>
+
+  <div class="signup-container">
+    <form class="signup-box" id="signup-form" action="/user/signup" method="post">
+      <h2>Create Account</h2>
+      <span class="error-msg" id="allFieldsError"></span>
+
+      <% if (errorMessage) { %>
+        <div style="color: red; font-weight: bold; margin-bottom: 10px;">
+          <%= errorMessage %>
+        </div>
+      <% } %>
+      
+      <% if (successMessage) { %>
+        <div style="color: green; font-weight: bold; margin-bottom: 10px;">
+          <%= successMessage %>
+        </div>
+      <% } %>
+
+
+      <input type="text" id="username" name="username"  placeholder="Username" >
+      <span class="error-msg" id="usernameError"></span>
+
+      <input type="email" id="email" name="email" placeholder="Email" >
+      <span class="error-msg" id="emailError"></span>
+
+      <input type="tel" id="phone" name="phone" placeholder="Phone number" >
+      <span class="error-msg" id="phoneError"></span>
+
+      <div class="password-wrapper">
+      <input type="password" id="password" name="password" placeholder="Password" >
+      <i class="fas fa-eye toggle-password" toggle="#password"></i>
+      <span class="error-msg" id="passwordError"></span>
+    </div>
+
+    <div class="password-wrapper">
+      <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" >
+      <i class="fas fa-eye toggle-password" toggle="#confirmPassword"></i>
+      <span class="error-msg" id="confirmPasswordError"></span>
+    </div>
+
+      <button type="submit">Sign Up</button>
+      
+      <div style="text-align: center; margin-top: 15px;">
+        <p>Have an account? <a href="/user/login">Login</a></p>
+      </div>
+
+      <div style="text-align: center; margin: 20px 0; position: relative;">
+        <hr style="border: none; height: 1px; background: #aaa;">
+        <span style="position: absolute; top: -12px; left: 50%; background: #D9D9D9; padding: 0 10px; transform: translateX(-50%); color: #555;">or login with</span>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="/user/auth/google" style="display: inline-block; padding: 10px 20px; background-color: #4285F4; color: white; border-radius: 5px; text-decoration: none; font-weight: bold;">
+          <i class="fab fa-google" style="margin-right: 8px;"></i> Google
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+  <%- include("../../views/partials/user/footer")%>
+
+
+
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script>
+
+    const signupForm = document.getElementById('signup-form');
+    signupForm.addEventListener('submit',(event)=>{
+        let isValid = true;
+
+    const username = document.getElementById('username');
+    const email = document.getElementById('email');
+    const phone = document.getElementById('phone');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+
+    const usernameError = document.getElementById('usernameError');
+    const emailError = document.getElementById('emailError');
+    const phoneError = document.getElementById('phoneError');
+    const passwordError = document.getElementById('passwordError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
+    const allFieldsError = document.getElementById('allFieldsError')
+
+    usernameError.textContent = '';
+    emailError.textContent = '';
+    phoneError.textContent = '';
+    passwordError.textContent = '';
+    confirmPasswordError.textContent = '';
+    allFieldsError.textContent = '';
+
+    if(!username.value.trim() || !email.value.trim() || !phone.value.trim() || 
+       !password.value.trim() || !confirmPassword.value.trim()){
+      allFieldsError.textContent = "All Fields are required ";
+      isValid = false;
+
+      if (!isValid) {
+        event.preventDefault();
+        return;
+      }
+    }
+
+    if (username.value.trim().length < 3) {
+      usernameError.textContent = 'Username must be at least 3 characters';
+      isValid = false;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email.value.trim())) {
+      emailError.textContent = 'Enter a valid email';
+      isValid = false;
+    }
+
+    const phonePattern = /^[0-9]{10}$/;
+    if (!phonePattern.test(phone.value.trim())) {
+      phoneError.textContent = 'Enter a valid 10-digit phone number';
+      isValid = false;
+    }
+
+    if (password.value.length < 6) {
+      passwordError.textContent = 'Password must be at least 6 characters';
+      isValid = false;
+    }
+
+    if (password.value !== confirmPassword.value) {
+      confirmPasswordError.textContent = 'Passwords do not match';
+      isValid = false;
+    }
+
+    if (!isValid) event.preventDefault(); 
+})
+
+    const toggleIcons = document.querySelectorAll('.toggle-password')
+    toggleIcons.forEach(icon => {
+    icon.addEventListener('click', () => {
+      const input = document.querySelector(icon.getAttribute('toggle'));
+      const isPassword = input.getAttribute('type') === 'password';
+      input.setAttribute('type', isPassword ? 'text' : 'password');
+      icon.classList.toggle('fa-eye');
+      icon.classList.toggle('fa-eye-slash');
+    });
+  });
+
+  </script>
+
+</body>
+</html>

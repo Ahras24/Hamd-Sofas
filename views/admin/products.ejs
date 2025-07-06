@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin-product Management</title>
+    <link rel="icon" type="image/png" href="/public/images/admin-favicon.jpg">
+    <link rel="stylesheet" href="/public/admin/css/product.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+  <%- include("../../views/partials/admin/sidebar")%>
+
+<div class="main-content">
+    <div class="top-bar">
+        <h1>PRODUCT MANAGEMENT</h1>
+        <form action="/admin/addProducts" method="GET">
+          <button type="submit" class="add-product-btn">Add Product</button>
+        </form>     
+       </div>
+    
+    <!-- Search Bar -->
+    <form action="/admin/products" method="GET" class="search-bar-container" >
+      <div class="search-bar">
+      <input type="text" name="search" placeholder="Search by product name..." value="<%= search || '' %>" >
+      <button type="submit" class="btn-search" >Search</button>
+      <a href="/admin/products?page=1" class="btn-clear" >Clear</a>
+      </div>
+
+      <% if(typeof totalProducts !== 'undefined') { %>
+        <span class="total-products" >
+          Total Products: <%= totalProducts %>
+        </span>
+        <% } %>
+  </form>
+  
+  <% if(products.length === 0) { %>
+    <p>No Product Found</p>
+  <%  } else { %>
+  <table class="product-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product Name</th>
+          <th>Image</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th>Regular Price</th>
+          <th>Sale Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      
+        <% products.forEach((product, index) => { %>
+          <tr>
+            <td><%= index + 1 + (page - 1) * perPage %></td>
+            <td><%= product.productName %></td>
+            <td>
+              <% if (product.productImage && Array.isArray(product.productImage) && product.productImage.length > 0) { %>
+                <img src="<%= product.productImage[0] %>" width="40" height="40" style="margin-right: 5px; border-radius: 5px;">
+              <% } else { %>
+                <span>No image</span>
+              <% } %>
+            </td>
+            <td><%= product.description %></td>
+            <td><%= product.category ? product.category.name : 'Unknown' %></td>
+            <td>₹<%= product.regularPrice %></td>
+            <td>₹<%= product.salePrice %></td>
+            <td><%= product.stock %></td>
+            
+            <td id="statusCell-<%= product._id %>"> 
+              <%= product.isBlocked ? 'Blocked' : 'Active' %>
+            </td>
+
+            <td>
+                <a href="/admin/editProduct?id=<%= product._id%>" class="btn-edit"> Edit </a>
+                
+              <button id="toggleButton-<%= product._id %>"
+                data-blocked="<%= product.isBlocked %>"
+                onclick="toggleBlockStatus('<%= product._id %>')"
+                class="btn <%= product.isBlocked ? 'unblock' : 'block' %>"
+                style="padding: 5px 10px; border-radius: 4px;">
+                <%= product.isBlocked ? 'Unblock' : 'Block' %>
+              </button>
+            </td>
+
+          </tr>
+        <% }) %>
+      </tbody>
+  </table>
+  <% } %>
+
+  <!-- Pagination  -->
+  <% if (totalPages > 1) { %>
+    <div class="d-flex justify-content-center mt-4">
+      <nav>
+        <ul class="pagination">
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= i === page ? 'active' : '' %>">
+              <a class="page-link" href="/admin/products?page=<%= i %><%= search ? '&search=' + encodeURIComponent(search) : '' %>"><%= i %></a>
+            </li>
+          <% } %>
+        </ul>
+      </nav>
+    </div>
+  <% } %>
+
+ 
+  <script>
+    // Swal Messages 
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const success = urlParams.get('success');
+      const error = urlParams.get('error');
+      if (success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: success,
+          confirmButtonColor: '#9CAEA9',
+          timer: 3000
+        }).then(() => {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        });
+
+      } else if (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error,
+          confirmButtonColor: '#9CAEA9',
+          timer: 3000
+        }).then(() => {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        });
+      }
+    });
+
+    function toggleBlockStatus(productId) {
+      const button = document.querySelector(`#toggleButton-${productId}`);
+      const currentlyBlocked = button.getAttribute('data-blocked') === 'true';
+      const newBlockStatus = !currentlyBlocked;
+      const action = newBlockStatus ? 'Block' : 'Unblock';
+
+  Swal.fire({
+    title: `Are you sure?`,
+    text: `Do you want to ${action.toLowerCase()} this product?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: newBlockStatus ? '#d33' : '#3085d6',
+    cancelButtonColor: '#aaa',
+    confirmButtonText: `Yes, ${action}`
+    
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/admin/products/toggle-block/${productId}?block=${newBlockStatus}`, {
+          method: 'PATCH'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          button.setAttribute('data-blocked',newBlockStatus);
+          button.classList.toggle('block',!newBlockStatus);
+          button.classList.toggle('unblock',newBlockStatus);
+          button.textContent = newBlockStatus ? 'Unblock' : 'Block';
+
+          const statusCell = document.querySelector(`#statusCell-${productId}`);
+          if(statusCell) statusCell.textContent = newBlockStatus ? 'Blocked' : 'Active';
+
+          Swal.fire(`${data.status}!`, `Product has been ${data.status.toLowerCase()}.`, 'success');
+        } else {
+          Swal.fire('Error', 'There was an issue updating the product status.', 'error');
+        }
+        
+      } catch (error) {
+        console.error('Error toggling block status:', error);
+        Swal.fire('Error', 'Failed to update product status.', 'error');
+      }
+    }
+  });
+}
+
+    // async function confirmDelete(productId) {
+    //   const result = await Swal.fire({
+    //     icon: 'warning',
+    //     title: 'Are you sure?',
+    //     text: 'Do you want to delete this product?',
+    //     showCancelButton: true,
+    //     confirmButtonColor: '#9CAEA9',
+    //     cancelButtonColor: '#dc3545',
+    //     confirmButtonText: 'Yes, delete it!'
+    //   });
+
+    //   if (result.isConfirmed) {
+    //     try {
+    //       const res = await fetch(`/admin/products/delete/${productId}`, {
+    //         method: 'POST'
+    //       });
+
+    //       const result = await res.json();
+    //       if (res.ok) {
+    //         Swal.fire({
+    //           icon: 'success',
+    //           title: 'Success',
+    //           text: 'Product deleted successfully',
+    //           confirmButtonColor: '#9CAEA9',
+    //           timer: 3000
+    //         }).then(() => {
+    //           window.location.reload();
+    //         });
+
+    //       } else {
+    //         Swal.fire({
+    //           icon: 'error',
+    //           title: 'Error',
+    //           text: result.error || 'Failed to delete product',
+    //           confirmButtonColor: '#9CAEA9',
+    //           timer: 3000
+    //         });
+    //       }
+    //     } catch (error) {
+    //       Swal.fire({
+    //         icon: 'error',
+    //         title: 'Error',
+    //         text: 'Error while deleting Product',
+    //         confirmButtonColor: '#9CAEA9',
+    //         timer: 3000
+    //       });
+    //     }
+    //   }
+    // }
+
+  </script>
+
+    
+    
+</body>
+</html>

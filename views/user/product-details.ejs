@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details Page</title>
+    <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+    <link rel="stylesheet" href="/public/user/css/product-details.css">
+    <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+    <%- include("../../views/partials/user/navbar")%>
+
+
+<div class="container">
+  <div class="left">
+
+<div class="image-container">
+    <button class="arrow-btn" id="prevBtn">&#10094;</button>
+    <img id="mainImage" class="main-image" src="<%= product.productImage[0] %>" alt="<%= product.productName %>">
+
+      <!-- Wishlist Icon -->
+      <form class="wishlist-form" data-product-id="<%= product._id %>">
+        <button type="submit" class="wishlist-icon" >
+          <i class="fa-solid fa-heart"></i>
+           <span class="tooltip">Add to Wishlist</span>
+         </button>
+      </form>
+  
+    <button class="arrow-btn" id="nextBtn">&#10095;</button>
+</div>
+
+    <div class="sub-images">
+      <% product.productImage.forEach(function (image,index) { %> 
+        <img class="sub-image" src="<%= image %>" alt="Sub Image <%= index + 1 %>" onclick="changeMainImage('<%= image %>')">
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- Fullscreen Image Modal -->
+<div id="imageModal" class="image-modal">
+  <span class="close-btn">&times;</span>
+  <span class="modal-prev">&#10094;</span>
+  <img class="modal-content" id="modalImage" />
+  <span class="modal-next">&#10095;</span>
+</div>
+
+    <div class="right">
+
+      <!-- BreadCrumbs-->
+      <div class="breadcrumbs">
+        <a href="/user/home">Home</a> >
+        <a href="/user/shop">Shop</a> >
+        <% if(product.category) { %>
+            <a href="/user/category/<%= product.category._id %>"><%= product.category.name %></a> >
+            <% } %>
+            <span><%= product.productName %></span>
+         </div>
+
+        <!-- Category Section -->
+         <div class="product-category">
+            <% if(product.category) { %>
+                <img class="category-icon" src="<%= product.category.imageUrl %>" alt="Category Icon">
+                <span>Category: <%= product.category.name %> </span>
+                <% } else { %>
+                    <span>No Category Info</span>
+                    <% } %>
+           </div>
+
+
+         <!-- Product Info-->
+      <div class="title">
+        <h1><%= product.description %></h1>
+
+        <p class="price-info">
+          <span class="regular-price">₹<%= product.regularPrice.toFixed(2) %></span>
+          <span class="sale-price">₹<%= product.salePrice.toFixed(2) %></span>
+
+          <% if(product.appliedOfferDiscount > 0 ) { %>
+            <span class="final-price">Now: ₹<%= product.finalPrice.toFixed(2) %></span>
+            <span class="offer-tag">~<%= product.appliedOfferDiscount %>% OFF</span>
+          <% }  %>
+          </p>
+
+        <p class="stock"><strong>Stock:</strong>
+            <% if(product.stock <=0) { %>
+                <span class="unavailable">Out of stock</span>
+                <% } else { %>
+                    <%= product.stock %> Items Available
+                <% } %>
+        </p>
+      </div>
+
+      <div class="rating">★★★★☆ (124 reviews)</div>
+      <!-- <div class="price">₹25,000 <span class="discount"> 10% OFF with coupon</span></div> -->
+
+
+    <!-- Add to Cart Button-->
+     <div class="cart-actions">
+        <% if (product.stock === 0) { %>
+          <button class="add-cart-btn" disabled style="background-color: gray; cursor: not-allowed;">Out of Stock</button>
+        <% } else { %>
+          <button class="add-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+        <% } %>
+     </div>
+
+      <div class="highlights">
+        <h3>Highlights / Specs:</h3>
+        <div class="highlight-item">Premium Sage Green Upholstery</div>
+        <div class="highlight-item">Solid Wood Frame</div>
+        <div class="highlight-item">Seating Capacity: 5</div>
+      </div>
+
+      <div class="reviews">
+        <h3>Customer Reviews:</h3>
+        <div class="review-item">Very comfortable and stylish - Rina</div>
+        <div class="review-item">Looks great in my living room! - Ajay</div>
+      </div>
+
+      </div>
+    </div>
+
+      <!-- Related Products Section-->
+   <% if (relatedProducts && relatedProducts.length > 0) { %>
+  <div class="related-products">
+    <h3 class="main-head">Related Products:</h3>
+
+    <div class="product-grid">
+      <% relatedProducts.forEach((product) => { %>
+        <div class="product-card">
+
+      <!-- Wishlist Icon -->
+      <form class="wishlist-form" data-product-id="<%= product._id %>">
+        <button type="submit" class="wishlist-icon">
+          <i class="fa-solid fa-heart"></i>
+           <span class="tooltip">Add to Wishlist</span>
+         </button>
+      </form>
+
+          <!-- product Link-->
+          <a href="/user/product-details/<%= product._id %>">
+            <div class="product-img-wrapper">
+            <img src="<%= product.productImage[0] %>" alt="<%= product.productName %>">
+          </div>
+
+            <div class="product-info" style="padding: 15px;">
+              <h3><%= product.productName %></h3>
+              <p><%= product.description.substring(0,60) %></p>
+              <p>
+                <span class="regular-price">₹<%= product.regularPrice.toFixed(2) %></span>
+                <span class="sale-price">₹<%= product.salePrice.toFixed(2) %></span>
+              </p>
+              <p class="tax-note">Inclusive of all taxes</p>
+              </div>
+              </a>
+
+             <div class="product-actions">
+                <% if (product.stock === 0) { %>
+                  <button class="add-cart-btn" disabled style="background-color: gray; cursor: not-allowed;">Out of Stock</button>
+                <% } else { %>
+                  <button class="add-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+                <% } %>
+             </div>
+
+            </div>
+      <% }); %>
+    </div>
+  </div>
+<% } else { %>
+  <p>No related products found.</p>
+<% } %>
+
+
+<!-- Zoom Modal -->
+<div id="imageModal" class="modal">
+  <span class="close-btn">&times;</span>
+  <button class="modal-prev">&#10094;</button>
+  <img class="modal-content" id="modalImage">
+  <button class="modal-next">&#10095;</button>
+</div>
+  
+
+
+  <%- include("../../views/partials/user/footer")%>
+
+  <script>
+      const mainImage = document.getElementById("mainImage");
+      const thumbnails = document.querySelectorAll(".sub-image");
+      let currentIndex = 0;
+
+  function updateMainImage(index) {
+    mainImage.src = thumbnails[index].src;
+    thumbnails.forEach(thumb => thumb.classList.remove("active"));
+    thumbnails[index].classList.add("active");
+  }
+
+  thumbnails.forEach((thumb, index) => {
+    thumb.addEventListener("click", () => {
+      currentIndex = index;
+      updateMainImage(currentIndex);
+    });
+  });
+
+  document.getElementById("prevBtn").addEventListener("click", () => {
+    currentIndex = (currentIndex - 1 + thumbnails.length) % thumbnails.length;
+    updateMainImage(currentIndex);
+  });
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    currentIndex = (currentIndex + 1) % thumbnails.length;
+    updateMainImage(currentIndex);
+  });
+
+  // Initialize first active
+  updateMainImage(currentIndex);
+
+
+   const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImage");
+  const closeBtn = document.querySelector(".close-btn");
+  const prevBtn = document.querySelector(".modal-prev");
+  const nextBtn = document.querySelector(".modal-next");
+
+  const allImages = Array.from(document.querySelectorAll(".main-image, .sub-image"));
+  let currentIndexx = 0;
+
+  function openModal(index) {
+    currentIndexx = index;
+    modalImg.src = allImages[currentIndexx].src;
+    modal.classList.add("show");
+  }
+
+  // Event Listeners
+  allImages.forEach((img, i) => {
+    img.addEventListener("click", () => openModal(i));
+  });
+
+  closeBtn.addEventListener("click", () => {
+    modal.classList.remove("show");
+  });
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.remove("show");
+  });
+
+  prevBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    currentIndexx = (currentIndexx - 1 + allImages.length) % allImages.length;
+    modalImg.src = allImages[currentIndexx].src;
+  });
+
+  nextBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    currentIndexx = (currentIndexx + 1) % allImages.length;
+    modalImg.src = allImages[currentIndexx].src;
+  });
+
+
+  function addToCart(productId) {
+  fetch('/user/add-to-cart', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops!',
+          text: data.error
+        });
+      } else {
+        Swal.fire({
+          icon: 'success',
+          title: 'Added to Cart!',
+          text: 'The product was added successfully.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        setTimeout(() => window.location.href = '/user/cart', 1500);
+      }
+    })
+    .catch(err => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed!',
+        text: 'Something went wrong.'
+      });
+    });
+}
+
+document.querySelectorAll('.wishlist-form').forEach(form => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const productId = form.getAttribute('data-product-id');
+
+      const result = await Swal.fire({
+        title: 'Add to Wishlist?',
+        text: "Do you want to add this product to your wishlist?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#9CAEA9',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, add it!'
+      });
+
+      if (result.isConfirmed) {
+        fetch('/user/add-to-wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ productId })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Added!',
+              text: data.message,
+              timer: 1500,
+              showConfirmButton: false
+            });
+          } else {
+            throw new Error(data.message);
+          }
+        })
+        .catch(err => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops!',
+            text: err.message || 'Something went wrong.',
+          });
+        });
+      }
+    });
+  });
+
+</script>
+
+
+
+    
+</body>
+</html>

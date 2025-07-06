@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile Page</title>
+    <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+    <link rel="stylesheet" href="/public/user/css/edit-profile.css">
+    
+</head>
+<body>
+
+    <%- include("../../views/partials/user/navbar")%>
+
+<div class="back-to-profile">
+  <a href="/user/user-account" class="btn back-btn">← Back to Profile page</a>
+</div>
+
+
+    <div class="edit-profile-container">
+  <h2>Edit Profile</h2>
+  <form action="/user/edit-profile" method="POST" enctype="multipart/form-data" class="edit-profile-form" id="edit-profile-form">
+    <div class="form-group">
+        
+      <label for="profileImage">Profile Image</label>
+      <div class="profile-img-preview">
+        <img src="<%= user.profileImage || '/images/default-avatar.png' %>" alt="Profile" id="preview-img">
+      </div>
+      <input type="file" name="profileImage" id="profileImage" accept="image/*" onchange="previewImage(event)">
+    </div>
+
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="username" name="username" value="<%= user.username %>" >
+      <span class="error-msg" id="usernameError"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="mobile">Mobile</label>
+      <input type="text" id="phone" name="phone" value="<%= user.phone %>">
+      <span class="error-msg" id="phoneError"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <span class="error-msg" id="emailError">
+      <% if (emailExistsError && emailExistsError.length > 0) { %>
+          <%= emailExistsError[0] %>
+      <% } %>
+      </span>
+      <input type="email" id="email" name="email" value="<%= user.email %>" >
+
+      <small class="note">⚠️ Changing email will require OTP verification</small>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn">Update Profile</button>
+      <a href="/user/user-account" class="btn cancel-btn">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<%- include("../../views/partials/user/footer")%>
+
+
+
+<script>
+  function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      document.getElementById('preview-img').src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+
+
+  const form = document.getElementById('edit-profile-form');
+  form.addEventListener('submit', (event) => {
+    let isValid = true;
+
+    const username = document.getElementById('username');
+    const email = document.getElementById('email');
+    const phone = document.getElementById('phone');
+
+    const usernameError = document.getElementById('usernameError');
+    const emailError = document.getElementById('emailError');
+    const phoneError = document.getElementById('phoneError');
+    
+
+    // Clear existing error messages
+    usernameError.textContent = '';
+    emailError.textContent = '';
+    phoneError.textContent = '';
+
+
+
+    // Username validation
+    if (username.value.trim().length < 3) {
+      usernameError.textContent = "Username must be at least 3 characters.";
+      isValid = false;
+    }
+
+    // Email pattern validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email.value.trim())) {
+      emailError.textContent = "Enter a valid email.";
+      isValid = false;
+    }
+
+    // Phone number validation
+    const phonePattern = /^[0-9]{10}$/;
+    if (!phonePattern.test(phone.value.trim())) {
+      phoneError.textContent = "Enter a valid 10-digit phone number.";
+      isValid = false;
+    }
+
+    if (!isValid) event.preventDefault();
+  });
+
+
+</script>
+    
+
+    
+
+</body>
+</html>

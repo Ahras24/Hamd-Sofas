@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin-Order Details</title>
+    <link rel="icon" type="image/png" href="/public/images/admin-favicon.jpg">
+    <link rel="stylesheet" href="/public/admin/css/order-details.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+    <%- include("../../views/partials/admin/sidebar") %>
+
+
+    <div class="order-details-container">
+    <h1>Order Details</h1>
+
+    <div class="section">
+      <h2>Order Info</h2>
+      <p><strong>Order ID:</strong> <%= order.customId %></p>
+      <p><strong>Date:</strong> <%= order.createdAt.toLocaleDateString() %></p>
+      <p><strong>Status:</strong>
+        <span class="status-badge <%= order.status.toLowerCase().replace(/\s/g, '-') %>"><%= order.status.toUpperCase() %></span>
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Customer Info</h2>
+      <p><strong>Name:</strong> <%= order.userId?.username || 'N/A' %></p>
+      <p><strong>Email:</strong> <%= order.userId?.email || 'N/A' %></p>
+    </div>
+
+    <div class="section">
+      <h2>Shipping Address</h2>
+      <p><%= order.address.fullName %>, <%= order.address.street %>, <%= order.address.pincode %> </p>
+      <p><%= order.address.city %>, <%= order.address.state %> - <%= order.address.country %></p>
+      <p>Phone: <%= order.address.phone %></p>
+    </div>
+
+    <div class="section">
+      <h2>Ordered Items</h2>
+      <% order.items.forEach((item, i) => { %>
+        <div class="item-card">
+          <div class="image">
+            <img src="<%= item.product.productImage[0] %>" alt="Product" />
+          </div>
+          <div class="info">
+            <p><strong><%= i + 1 %>. <%= item.product.productName %></strong></p>
+            <p>Qty: <%= item.quantity %></p>
+            <p>Price: ₹<%= item.price.toLocaleString('en-IN') %></p>
+            <p>Status:
+              <span class="status-badge <%= item.status.toLowerCase() %>"><%= item.status.toUpperCase() %></span>
+            </p>
+
+            <% if (item.status === 'cancelled' && item.cancelReason) { %>
+              <p><em>Cancelled Reason: <%= item.cancelReason %></em></p>
+            <% } %>
+
+            <!-- Return Status Display -->
+            <% if (item.returnStatus) { %>
+              <p>Return Status:
+                <span class="return-status-badge <%= item.returnStatus.toLowerCase().replace(/\s/g, '-') %>">
+                  <%= item.returnStatus.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                </span>
+              </p>
+            <% } %>
+
+           <% if (item.returnStatus === 'return-requested') { %>
+            <div class="return-request-box">
+            <p><strong>Return Requested On:</strong> <%= item.returnRequestedAt ? new Date(item.returnRequestedAt).toLocaleDateString() : 'N/A' %></p>
+            <p><strong>Reason:</strong> <%= item.returnReason || 'Not provided' %></p>
+
+          <div class="return-buttons">
+          <form action="/admin/orders/<%= order.customId %>/return/<%= item.product._id %>/approve" method="POST">
+           <button type="submit" class="approve-return-btn swal-approve-btn">Approve</button>
+          </form>
+
+        <form action="/admin/orders/<%= order.customId %>/return/<%= item.product._id %>/deny" method="POST">
+          <textarea name="denyReason" placeholder="Reason to deny (optional)" rows="2"></textarea>
+          <button type="submit" class="deny-return-btn swal-deny-btn">Deny</button>
+        </form>
+      </div>
+    </div>
+  <% } %>
+            
+            <!-- Show return result if processed -->
+            <% if (item.returnStatus === 'return-approved') { %>
+              <div class="return-approved-section">
+                <p class="return-approved">✅ Return Approved</p>
+                <% if (item.returnApprovedAt) { %>
+                  <p><small>Approved on: <%= new Date(item.returnApprovedAt).toLocaleDateString() %></small></p>
+                <% } %>
+              </div>
+            <% } %>
+            
+            <% if (item.returnStatus === 'return-denied') { %>
+              <div class="return-denied-section">
+                <p class="return-denied">❌ Return Denied</p>
+                <% if (item.returnDeniedAt) { %>
+                  <p><small>Denied on: <%= new Date(item.returnDeniedAt).toLocaleDateString() %></small></p>
+                <% } %>
+                <% if (item.returnDenyReason) { %>
+                  <p><small>Reason: <%= item.returnDenyReason %></small></p>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+  
+
+    <div class="section">
+      <h2>Payment Summary</h2>
+      <p>Subtotal: ₹<%= order.subtotal.toLocaleString('en-IN') %></p>
+      <p>Discount: ₹<%= order.discount %></p>
+      <p>Tax:10% ₹<%= order.tax.toLocaleString('en-IN') %></p>
+      <p>Shipping: ₹<%= order.shippingCharge %></p>
+      <p><strong>Grand Total: ₹<%= order.grandTotal.toLocaleString('en-IN') %></strong></p>
+    </div>
+
+    <% if(order.status !== 'delivered') { %>
+    <div class="status-box">
+<form action="/admin/orders/<%= order.customId %>/status" method="POST">
+  <label for="status">Change Status:</label>
+  <select name="status" id="status">
+    <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+    <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+    <option value="out-for-delivery" <%= order.status === 'out-for-delivery' ? 'selected' : '' %>>Out for Delivery</option>
+    <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+    <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+    <option value="return-requested" <%= order.status === 'return-requested' ? 'selected' : '' %>>Return Requested</option>
+    <option value="returned" <%= order.status === 'returned' ? 'selected' : '' %>>Returned</option>
+  </select>
+
+  <button type="submit" class="update-status-btn">Update</button>
+</form>
+</div>
+<% } %>
+
+    <div class="actions">
+      <a href="/admin/orders" class="back-btn">← Back to Orders</a>
+    </div>
+  </div>
+  </div>
+
+
+  <script>
+  document.querySelectorAll('.swal-approve-btn').forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+      const form = this.closest('form');
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Approve this return request?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Approve',
+        cancelButtonText: 'Cancel'
+      }).then(result => {
+        if (result.isConfirmed) {
+          form.submit();
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.swal-deny-btn').forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+      const form = this.closest('form');
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Deny this return request?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Deny',
+        cancelButtonText: 'Cancel'
+      }).then(result => {
+        if (result.isConfirmed) {
+          form.submit();
+        }
+      });
+    });
+  });
+</script>
+    
+</body>
+</html>

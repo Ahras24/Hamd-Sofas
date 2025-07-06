@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order failure</title>
+    <link rel="stylesheet" href="/public/user/css/order-failure.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+  <%- include("../../views/partials/user/navbar")%>
+
+<div class="failure-container">
+  <img src="/public/images/order-failure..jpg" alt="Order Failed Illustration" />
+  <h2>Oops! Payment Failed</h2>
+  <p>Something went wrong during the payment process. Please try again or check your order status.</p>
+
+  <div class="failure-buttons"> 
+    <a href="/user/orders" class="details-btn">Order Details</a>
+  </div>
+</div>
+
+  <%- include("../../views/partials/user/footer")%>
+
+ 
+
+
+    
+</body>
+</html>

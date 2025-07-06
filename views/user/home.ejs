@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Home Page</title>
+  <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+  <link rel="stylesheet" href="/public/user/css/home.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- Space for Navbar -->
+  <div class="navbar-space">
+    <%- include("../../views/partials/user/navbar")%>
+  </div>
+
+  <!-- Full Width Hero Image -->
+  <div class="hero-container">
+    <img src="/public/user/images/banner-img1.png" alt="Hero Image" class="hero-image">
+    <div class="hero-text">
+      Welcome to <span>HAMD SOFAS</span>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div class="features">
+    <div class="feature-box">
+      <i class="fa fa-truck"></i>
+      <p>Free Delivery</p>
+    </div>
+    <div class="feature-box">
+      <i class="fa fa-headset"></i>
+      <p>24/7 Support</p>
+    </div>
+    <div class="feature-box">
+      <i class="fa fa-lock"></i>
+      <p>Secure Payment</p>
+    </div>
+  </div>
+
+  <!-- About Us Section -->
+  <section class="about-us">
+    <h2>About Us</h2>
+    <p>
+      We create products that combine quality, innovation, and respect for the environment,
+      designed to meet your expectations with precision. Every day, our team puts its
+      expertise and passion into customer satisfaction, offering you more than just a shopping
+      experience: a true relationship of trust, built on strong values and a commitment to
+      sustainability.
+    </p>
+    <img src="/public/user/images/banner-img2.jpg" alt="About Banner">
+  </section>
+
+  <section class="banner">
+    <img src="/public/user/images/banner-img3.png" alt="Banner Image">
+  </section>
+
+  <div class="section-title">
+  <h2>FEATURED PRODUCTS</h2>
+  <p>Discover our exclusive selection of the season's flagship products. We highlight carefully chosen items for their quality, design, and popularity. Whether you're looking for the latest trends or timeless essentials, our featured products are here to meet all your needs. Don't miss out on these opportunities to make your interior unique and reflective of your image!
+  </p>
+</div>
+
+  <section class="sofa-section">
+    <div class="sofa-left">
+      <h2>SOFAS</h2>
+      <p>Treat yourself to a luxurious and relaxing experience with our sofa collection. Each model is carefully designed with refined design and exceptional comfort, transforming your interior into a true haven of serenity and elegance.
+      </p>
+      <a href="/user/shop" class="sofa-button">Discover Our Sofa Collection</a>
+    </div>
+
+    <div class="sofa-right">
+    <img src="/public/user/images/banner-img4.png" alt="Banner Image">
+    </div>
+  </section>
+
+  <%- include("../../views/partials/user/footer")%>
+
+
+</body>
+</html>

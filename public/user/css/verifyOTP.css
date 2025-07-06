@@ -1,0 +1,116 @@
+/* Reset basic styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f8f8;
+  }
+  
+  /* Navbar (assumes it's already styled in userHome.css) */
+  nav {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+  }
+  
+  /* Page content starts below the navbar */
+  .page-content {
+    margin-top: 100px; /* Height of the fixed navbar */
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  /* OTP Box Styling */
+  .otp-container {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 120px;
+  }
+  
+  .otp-container h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  .otp-container p {
+    font-size: 14px;
+    margin-bottom: 25px;
+    color: #555;
+  }
+  
+  /* OTP Inputs */
+  .otp-inputs {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .otp-inputs input {
+    width: 45px;
+    height: 50px;
+    font-size: 20px;
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.2s;
+  }
+  
+  .otp-inputs input:focus {
+    border-color: #9CAEA9;
+    outline: none;
+  }
+  
+  /* Button */
+  button[type="submit"] {
+    background-color: #9CAEA9;
+    color: #fff;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #839c95;
+  }
+  
+  /* Timer & Resend */
+  .timer {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .resend {
+    margin-top: 15px;
+  }
+  
+  .resend button {
+    background-color: transparent;
+    color: #9CAEA9;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: underline;
+  }
+  
+  .resend button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+  }

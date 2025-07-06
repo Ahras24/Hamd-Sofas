@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Option Page</title>
+    <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+    <link rel="stylesheet" href="/public/user/css/payment-option.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+</head>
+<body>
+
+    <%- include("../partials/user/navbar") %>
+
+    <div class="checkout-stepper">
+  <div class="step active">
+    <a href="/user/cart" class="step-link">
+    <div class="circle">1</div>
+    <div class="label">Cart</div>
+    </a>
+  </div>
+  <div class="line-container">
+    <div class="line-fill" style="width: 100%;"></div>
+    <div class="line-background"></div>
+  </div>
+  <div class="step active">
+    <a href="/user/checkout" class="step-link">
+    <div class="circle">2</div>
+    <div class="label">Checkout</div>
+    </a>
+  </div>
+  <div class="line-container">
+    <div class="line-fill" style="width: 100%;"></div>
+    <div class="line-background"></div>
+  </div>
+  <div class="step active">
+    <a href="/user/payment-option" class="step-link">
+    <div class="circle">3</div>
+    <div class="label">Payment</div>
+  </div>
+</div>
+
+   <div class="payment-page-wrapper">
+    <div class="payment-container">
+    <h2>Select Payment Method</h2>
+
+    <form id="paymentForm" action="/user/create-order" method="POST">
+
+      <!-- Razorpay option-->
+      <label class="payment-option">
+      <input type="radio" name="paymentMethod" value="razorpay">
+      <span>Razorpay (UPI, Card, Netbanking)</span>
+      <div class="logo-right">
+        <img src="/public/images/master-card-logo.png" alt="Card" />
+        <img src="/public/images/upi-logo.png" alt="UPI" />
+      </div>
+    </label>
+
+    <!-- COD Option -->
+    <label class="payment-option">
+      <input type="radio" name="paymentMethod" value="cod">
+      <span>Cash on Delivery (COD)</span>
+      <div class="logo-right">
+         <i class="fa-solid fa-truck icon cod"></i>
+      </div>
+    </label>
+
+    <!-- Wallet Option -->
+    <!-- <label class="payment-option">
+      <input type="radio" name="paymentMethod" value="wallet">
+      <span>Use Wallet Balance</span>
+      <div class="logo-right">
+      <i class="fa-solid fa-wallet icon wallet"></i>
+      </div>
+    </label> -->
+
+      <button id="continueBtn" class="button" type="submit">Continue to Payment</button>
+    </form>
+  </div>
+
+<!-- Right: Order Summary -->
+  <div class="order-summary-container">
+    <h3>Order Summary</h3>
+
+    <div class="order-summary-header">
+      <span class="total-items">Total Items: <%= totalItems %></span>
+    </div>
+
+    <div class="order-items">
+      <% cartItems.forEach(item => { %>
+        <div class="summary-item">
+          <img src="<%= item.productId.productImage[0] %>" alt="Product Image" />
+          <div class="item-details">
+            <p>Product Name: <%= item.productId.productName %></p>
+            <p>Qty: <%= item.quantity %></p>
+            <p>Price: ₹<%= item.productId.salePrice %></p>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="price-breakdown">
+      <div class="line-item"><span>Subtotal</span> <span>₹<%= subtotal.toLocaleString('en-IN') %></span></div>
+      <div class="line-item"><span>Coupon Discount</span> <span class="couponDiscount">-₹<%= discount || 0 %></span></div>
+      <div class="line-item"><span>Tax-10%</span> <span class="taxAmount">+₹<%= tax.toLocaleString('en-IN') || 0 %></span></div>
+      <div class="line-item"><span>Shipping</span> <span><%= shippingCharge === 0 ? "Free" : `₹${shippingCharge}` %></span></div>
+      <hr />
+      <div class="line-item total"><span>Grand Total</span> <span id="grandTotal">₹<%= grandTotal.toLocaleString('en-IN') %></span></div>
+    </div>
+  </div>
+</div>
+
+  <%- include("../partials/user/footer") %>
+
+  <script>
+
+    const form = document.getElementById('paymentForm');
+
+    form.addEventListener('submit',async function (e) {
+        e.preventDefault();
+
+       const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+       if (!selectedPaymentMethod) {
+        Swal.fire({
+          icon:'warning',
+          title:"Please select a payment method",
+          confirmButtonColor: '#9CAEA9'
+        });
+        return;
+       }
+
+        const totalAmount = parseFloat(document.getElementById('grandTotal').innerText.replace(/[₹,]/g, ''));
+        const paymentMethod = selectedPaymentMethod.value;
+
+        if (paymentMethod === 'cod' && totalAmount >= 1000) {
+          Swal.fire({
+          icon: 'warning',
+          title: 'COD Not Available',
+          text: 'Cash on Delivery is only available for orders below ₹1000.',
+          confirmButtonColor: '#9CAEA9'
+        });
+        return;
+        }
+
+        const selectedAddressId = "<%= selectedAddressId %>";
+
+        if (paymentMethod === 'razorpay') {
+
+        const amount = <%= JSON.stringify(grandTotal) %>;
+
+        const res = await fetch('/user/create-order',{
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount,selectedAddressId })
+        });
+
+        const data = await res.json();
+
+        const options = {
+            key: "<%= RAZORPAY_KEY_ID %>",
+            amount: data.order.amount,
+            currency: "INR",
+            name: "HAMD SOFAS",
+            order_id: data.order.id,
+
+            handler: async function (response) {
+                try { 
+                const verifyResponse = await fetch('/user/verify-payment',{
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(response)
+                });
+                
+                const result = await verifyResponse.json();
+                
+                if(result.success){
+                   window.location.href = `/user/order-success/${result.customId}`;
+                }else {
+                    window.location.href = `/user/order-failure/${result.customId}`;
+                }
+                } catch (error){
+                console.error("Verification failed: ",error);
+                window.location.href = `/user/order-failure`;
+                }
+            }
+        };
+ 
+        const rzp = new Razorpay(options);
+
+        rzp.on('payment.failed',async function(response) {
+            console.error("Payment Failed:", response.error);
+
+            const failureDetails = {
+              razorpayOrderId: response.error.metadata.order_id,
+              razorpayPaymentId: response.error.metadata.payment_id,
+              paymentStatus: 'failed',
+              paymentMethod: 'razorpay',
+              selectedAddressId: "<%= selectedAddressId %>",
+             
+            };
+
+            await fetch('/user/save-failed-order', {
+              method: 'POST',
+              headers: { 'Content-Type' : 'application/json' },
+              body: JSON.stringify(failureDetails,amount)
+            });
+
+            window.location.href = '/user/order-failure';
+        });
+
+        rzp.open();
+
+       }else {
+
+        const res = await fetch('/user/place-order-direct',{
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                selectedAddressId,
+                paymentMethod
+            }),
+        });
+        
+        const result = await res.json();
+        if(result.success){
+            window.location.href = `/user/order-success/${result.customId}`;
+        }else {
+            window.location.href = `/user/order-failure`;
+        }
+      }
+   });
+
+  </script>
+    
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin-Coupon Management</title>
+    <link rel="icon" type="image/png" href="/public/images/admin-favicon.jpg">
+    <link rel="stylesheet" href="/public/admin/css/coupons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+
+ <div class="layout">
+   <%- include("../../views/partials/admin/sidebar") %>
+
+  <div class="main-content">
+    <div class="coupon-container">
+      <h2>COUPON MANAGEMENT</h2>
+      <button class="add-btn" onclick="openAddModal()">+ Add Coupon</button>
+
+      <% if(coupons.length === 0) { %>
+        <p>No Coupon Found. Add Coupon.</p>
+      <% } else { %> 
+      <table class="coupon-table">
+        <thead>
+          <tr>
+            <th>SI.NO</th>
+            <th>Coupon Name</th>
+            <th>Coupon Code</th>
+            <th>Created On</th>
+            <th>Expire On</th>
+            <th>Discount</th>
+            <th>Min Value</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="couponTable">
+          <% coupons.forEach((coupon, index) => { %>
+            <tr>
+              <td><%= index + 1 + ((currentPage - 1) * 5) %></td>
+              <td><%= coupon.couponName || '-' %></td>
+              <td><%= coupon.couponCode %></td>
+              <td><%= coupon.createdAt.toDateString() %></td>
+              <td><%= coupon.expiry.toDateString() %></td>
+              <td>
+                <%= coupon.discountType === 'flat' ? '₹' + coupon.discountValue : coupon.discountValue + '%' %>
+              </td>
+              <td>₹<%= coupon.minCartValue %></td>
+              <td><%= coupon.isActive ? "Active" : "Inactive" %></td>
+              <td>
+                <button class="action-btn edit-btn" 
+                data-id="<%= coupon._id %>"
+                data-name="<%= coupon.couponName %>" 
+                data-code="<%= coupon.couponCode %>"
+                data-type="<%= coupon.discountType %>"
+                data-value="<%= coupon.discountValue %>" 
+                data-min="<%= coupon.minCartValue %>"
+                data-expiry="<%= coupon.expiry.toISOString().slice(0, 10) %>"
+                onclick="openEditModal(this)">
+                Edit
+               </button>
+
+              <button
+                class="action-btn delete-btn"
+                data-id="<%= coupon._id %>"
+                onclick="deleteCoupon(this)">
+                Delete
+              </button>
+
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <%  } %>
+    </div>
+            <div class="pagination" id="paginationLinks">
+        <% if( currentPage > 1) { %>
+          <a href="#" data-page="<%= currentPage - 1 %>">« Prev</a> 
+        <% } %>  
+
+        <% for (let i=1; i<= totalPages; i++) { %> 
+          <a href="#" data-page="<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+        <%  } %>
+
+        <% if ( currentPage < totalPages ) { %> 
+          <a href="#" data-page="<%= currentPage + 1 %>">Next »</a>
+        <% } %>
+      </div>
+  </div>
+  
+</div>
+
+      
+<!-- Add Modal -->
+<div id="addModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeAddModal()">&times;</span>
+    <h3>Add Coupon</h3>
+    <form method="POST" action="/admin/add-coupon" id="addCouponForm" onsubmit="return validateCouponForm()">
+      
+      <!-- Coupon Name -->
+      <input type="text" id="couponName" name="couponName" placeholder="Coupon Name"  />
+      <span class="error" id="errorCouponName"></span>
+
+      <!-- Coupon Code -->
+      <input type="text" id="couponCode" name="couponCode" placeholder="Coupon Code"  />
+      <span class="error" id="errorCouponCode"></span>
+
+      <!-- Discount Type -->
+      <select name="discountType" id="discountType" >
+        <option value="" disabled selected hidden>Discount Type</option>
+        <option value="flat">Flat</option>
+        <option value="percentage">Percentage</option>
+      </select>
+      <span class="error" id="errorDiscountType"></span>
+
+      <!-- Discount Value -->
+      <input type="number" id="discountValue" name="discountValue" placeholder="Discount Value"  />
+      <span class="error" id="errorDiscountValue"></span>
+
+      <!-- Min Cart Value -->
+      <input type="number" id="minCartValue" name="minCartValue" placeholder="Min Cart Value" />
+      <span class="error" id="errorMinCartValue"></span>
+
+      <!-- Expiry Date -->
+      <label for="expiryDate">Expire On</label>
+      <input type="date" id="expiryDate" name="expiry"  />
+      <span class="error" id="errorExpiryDate"></span>
+
+      <button type="submit">Create</button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeEditModal()">&times;</span>
+    <h3>Edit Coupon</h3>
+    <form method="POST" action="/admin/edit-coupon"  id="editCouponForm" onclick="return validateEditCouponForm()">
+      <input type="hidden" id="couponId" name="id">
+
+      <!-- Coupon Name -->
+      <input type="text" id="editCouponName" name="couponName" placeholder="Coupon Name"  />
+      <span class="edit-error" id="editErrorCouponName"></span>
+
+      <!-- Coupon Code -->
+      <input type="text" id="editCouponCode" name="couponCode" placeholder="Coupon Code"  />
+      <span class="edit-error" id="editErrorCouponCode"></span>
+
+      <!-- Discount Type -->
+      <select name="discountType" id="editDiscountType" >
+        <option value="" disabled selected hidden>Discount Type</option>
+        <option value="flat">Flat</option>
+        <option value="percentage">Percentage</option>
+      </select>
+      <span class="edit-error" id="editErrorDiscountType"></span>
+
+      <!-- Discount Value -->
+      <input type="number" id="editDiscountValue" name="discountValue" placeholder="Discount Value"  />
+      <span class="edit-error" id="editErrorDiscountValue"></span>
+
+      <!-- Min Cart Value -->
+      <input type="number" id="editMinCartValue" name="minCartValue" placeholder="Min Cart Value" />
+      <span class="edit-error" id="editErrorMinCartValue"></span>
+
+      <!-- Expiry Date -->
+      <label for="expiryDate">Expire On</label>
+      <input type="date" id="editExpiryDate" name="expiry"  />
+      <span class="edit-error" id="editErrorExpiryDate"></span>
+
+      <button type="submit">Update</button>
+    </form>
+  </div>
+</div>
+
+  <% if (typeof success !== "undefined" && success) { %>
+<script>
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: '<%= success %>',
+      confirmButtonColor: '#599c89'
+    });
+    </script>
+  <% } %>
+
+  <% if (typeof error !== "undefined" && error) { %>
+ <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops!',
+      text: '<%= error %>',
+      confirmButtonColor: '#e31e1e'
+    });
+</script>
+  <% } %>
+
+
+<script>
+
+  function openAddModal() {
+    document.getElementById('addModal').style.display = 'block';
+  }
+
+  function closeAddModal() {
+    document.getElementById('addModal').style.display = 'none';
+  }
+
+  function openEditModal(button){
+    document.getElementById('couponId').value = button.dataset.id;
+    document.getElementById('editCouponName').value = button.dataset.name;
+    document.getElementById('editCouponCode').value = button.dataset.code;
+    document.getElementById('editDiscountType').value = button.dataset.type;
+    document.getElementById('editDiscountValue').value = button.dataset.value;
+    document.getElementById('editMinCartValue').value = button.dataset.min;
+    document.getElementById('editExpiryDate').value = button.dataset.expiry;
+
+    document.getElementById('editModal').style.display = 'block';
+  }
+
+  function closeEditModal(){
+    document.getElementById('editModal').style.display = 'none';
+  }
+
+  window.onclick = function(event){
+    if(event.target.classList.contains('modal')) {
+      closeAddModal();
+      closeEditModal();
+    }
+  }
+
+  function validateCouponForm(){
+    console.log("validateing")
+    let isValid = true;
+
+    document.querySelectorAll('.error').forEach(el => el.textContent = '');
+
+    const name = document.getElementById("couponName").value.trim();
+    const code = document.getElementById("couponCode").value.trim();
+    const discountType = document.getElementById("discountType").value;
+    const discountValue = document.getElementById("discountValue").value.trim();
+    const minCartVal = document.getElementById("minCartValue").value.trim();
+    const expiry = document.getElementById("expiryDate").value;
+
+    if (!name) {
+        document.getElementById("errorCouponName").textContent = "Coupon name is required.";
+        isValid = false;
+    } else if (!/^[a-zA-Z\s\-\.\']+$/.test(name)) {
+        document.getElementById("errorCouponName").textContent = "Name can only contain letters, spaces, hyphens, dots, and apostrophes.";
+        isValid = false;
+    } else if (name.length < 2 || name.length > 50) {
+        document.getElementById("errorCouponName").textContent = "Name must be between 2 and 50 characters.";
+        isValid = false;
+    }
+    
+    // Code validation - letters and numbers only
+    if (!code) {
+        document.getElementById("errorCouponCode").textContent = "Coupon code is required.";
+        isValid = false;
+    } else if (!/^[a-zA-Z0-9]+$/.test(code)) {
+        document.getElementById("errorCouponCode").textContent = "Code can only contain letters and numbers.";
+        isValid = false;
+    } else if (code.length < 3 || code.length > 20) {
+        document.getElementById("errorCouponCode").textContent = "Code must be between 3 and 20 characters.";
+        isValid = false;
+    }
+    
+    // Discount type validation
+    if (!discountType) {
+        document.getElementById("errorDiscountType").textContent = "Please select a discount type.";
+        isValid = false;
+    }
+    
+    // Discount value validation - proper number validation
+    if (!discountValue) {
+        document.getElementById("errorDiscountValue").textContent = "Discount value is required.";
+        isValid = false;
+    } else if (!/^\d+(\.\d{1,2})?$/.test(discountValue)) {
+        document.getElementById("errorDiscountValue").textContent = "Enter a valid number (up to 2 decimal places).";
+        isValid = false;
+    } else {
+        const discountNum = parseFloat(discountValue);
+        if (discountNum <= 0) {
+            document.getElementById("errorDiscountValue").textContent = "Discount value must be greater than 0.";
+            isValid = false;
+        } else if (discountType === "percentage" && discountNum > 100) {
+            document.getElementById("errorDiscountValue").textContent = "Percentage discount cannot exceed 100%.";
+            isValid = false;
+        } else if (discountType === "fixed" && discountNum > 10000) {
+            document.getElementById("errorDiscountValue").textContent = "Fixed discount seems too high. Please check the amount.";
+            isValid = false;
+        }
+    }
+    
+    // Minimum cart value validation - proper number validation
+    if (!minCartVal) {
+        document.getElementById("errorMinCartValue").textContent = "Minimum cart value is required.";
+        isValid = false;
+    } else if (!/^\d+(\.\d{1,2})?$/.test(minCartVal)) {
+        document.getElementById("errorMinCartValue").textContent = "Enter a valid number (up to 2 decimal places).";
+        isValid = false;
+    } else {
+        const minCartNum = parseFloat(minCartVal);
+        if (minCartNum < 0) {
+            document.getElementById("errorMinCartValue").textContent = "Minimum cart value cannot be negative.";
+            isValid = false;
+        }
+    }
+    
+    // Expiry date validation - must be in the future
+    if (!expiry) {
+        document.getElementById("errorExpiryDate").textContent = "Please select expiry date.";
+        isValid = false;
+    } else {
+        const expiryDate = new Date(expiry);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day for fair comparison
+        
+        if (expiryDate < today) {
+            document.getElementById("errorExpiryDate").textContent = "Expiry date cannot be in the past.";
+            isValid = false;
+        } else if (expiryDate.getTime() === today.getTime()) {
+            document.getElementById("errorExpiryDate").textContent = "Expiry date must be at least tomorrow.";
+            isValid = false;
+        }
+    }
+    console.log("finieshed validation")
+    return isValid;
+  }
+
+  function validateEditCouponForm(){
+    let isValid = true;
+
+    document.querySelectorAll('.edit-error').forEach(el => el.textContent = '');
+
+    const name = document.getElementById("editCouponName").value.trim();
+    const code = document.getElementById("editCouponCode").value.trim();
+    const discountType = document.getElementById("editDiscountType").value;
+    const discountValue = document.getElementById("editDiscountValue").value.trim();
+    const minCartVal = document.getElementById("editMinCartValue").value.trim();
+    const expiry = document.getElementById("editExpiryDate").value;
+
+    if (!name) {
+        document.getElementById("editErrorCouponName").textContent = "Coupon name is required.";
+        isValid = false;
+    } else if (!/^[a-zA-Z\s\-\.\']+$/.test(name)) {
+        document.getElementById("editErrorCouponName").textContent = "Name can only contain letters, spaces, hyphens, dots, and apostrophes.";
+        isValid = false;
+    } else if (name.length < 2 || name.length > 50) {
+        document.getElementById("editErrorCouponName").textContent = "Name must be between 2 and 50 characters.";
+        isValid = false;
+    }
+    
+    // Code validation - letters and numbers only
+    if (!code) {
+        document.getElementById("editErrorCouponCode").textContent = "Coupon code is required.";
+        isValid = false;
+    } else if (!/^[a-zA-Z0-9]+$/.test(code)) {
+        document.getElementById("editErrorCouponCode").textContent = "Code can only contain letters and numbers.";
+        isValid = false;
+    } else if (code.length < 3 || code.length > 20) {
+        document.getElementById("editErrorCouponCode").textContent = "Code must be between 3 and 20 characters.";
+        isValid = false;
+    }
+    
+    // Discount type validation
+    if (!discountType) {
+        document.getElementById("editErrorDiscountType").textContent = "Please select a discount type.";
+        isValid = false;
+    }
+    
+    // Discount value validation - proper number validation
+    if (!discountValue) {
+        document.getElementById("editErrorDiscountValue").textContent = "Discount value is required.";
+        isValid = false;
+    } else if (!/^\d+(\.\d{1,2})?$/.test(discountValue)) {
+        document.getElementById("editErrorDiscountValue").textContent = "Enter a valid number (up to 2 decimal places).";
+        isValid = false;
+    } else {
+        const discountNum = parseFloat(discountValue);
+        if (discountNum <= 0) {
+            document.getElementById("editErrorDiscountValue").textContent = "Discount value must be greater than 0.";
+            isValid = false;
+        } else if (discountType === "percentage" && discountNum > 100) {
+            document.getElementById("editErrorDiscountValue").textContent = "Percentage discount cannot exceed 100%.";
+            isValid = false;
+        } else if (discountType === "fixed" && discountNum > 10000) {
+            document.getElementById("editErrorDiscountValue").textContent = "Fixed discount seems too high. Please check the amount.";
+            isValid = false;
+        }
+    }
+    
+    // Minimum cart value validation - proper number validation
+    if (!minCartVal) {
+        document.getElementById("editErrorMinCartValue").textContent = "Minimum cart value is required.";
+        isValid = false;
+    } else if (!/^\d+(\.\d{1,2})?$/.test(minCartVal)) {
+        document.getElementById("editErrorMinCartValue").textContent = "Enter a valid number (up to 2 decimal places).";
+        isValid = false;
+    } else {
+        const minCartNum = parseFloat(minCartVal);
+        if (minCartNum < 0) {
+            document.getElementById("editErrorMinCartValue").textContent = "Minimum cart value cannot be negative.";
+            isValid = false;
+        }
+    }
+    
+    // Expiry date validation - must be in the future
+    if (!expiry) {
+        document.getElementById("editErrorExpiryDate").textContent = "Please select expiry date.";
+        isValid = false;
+    } else {
+        const expiryDate = new Date(expiry);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day for fair comparison
+        
+        if (expiryDate < today) {
+            document.getElementById("editErrorExpiryDate").textContent = "Expiry date cannot be in the past.";
+            isValid = false;
+        } else if (expiryDate.getTime() === today.getTime()) {
+            document.getElementById("editErrorExpiryDate").textContent = "Expiry date must be at least tomorrow.";
+            isValid = false;
+        }
+    }
+    return isValid;
+  }
+
+async function deleteCoupon(button) {
+  const couponId = button.dataset.id;
+
+    const confirm = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will not be able to recover this coupon!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#9CAEA9',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if(confirm.isConfirmed) {
+      try {
+        const res = await fetch(`/admin/coupon/delete/${couponId}`, {
+          method: 'DELETE'
+        });
+
+        const result = await res.json();
+
+         if (res.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: result.message || 'Coupon deleted successfully.'
+          }).then(() => {
+            location.reload(); // or remove row dynamically
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Failed!',
+            text: result.message || 'Unable to delete coupon.'
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Something went wrong!'
+        });
+      }
+    }
+  }
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('paginationLinks').addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') {
+        e.preventDefault();
+        const page = e.target.dataset.page;
+        loadCouponPage(page);
+      }
+    });
+  });
+
+  function loadCouponPage(page) {
+    fetch(`/admin/coupons?page=${page}`, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+      .then(res => res.text())
+      .then(html => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+
+        const newTable = tempDiv.querySelector('#couponTable');
+        const newPagination = tempDiv.querySelector('#paginationLinks');
+
+        document.querySelector('#couponTable').innerHTML = newTable.innerHTML;
+        document.querySelector('#paginationLinks').innerHTML = newPagination.innerHTML;
+      })
+      .catch(err => console.error('Pagination load error:', err));
+  }
+
+</script>
+    
+</body>
+</html>

@@ -1,0 +1,81 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #e8e3dd;
+}
+
+/* Add wrapper to center the OTP form */
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh; /* Adjusted to prevent navbar/footer overlap */
+}
+
+/* OTP container styling */
+.otp-container {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 320px;
+}
+
+/* Other OTP input and button styles */
+.otp-container h2 {
+  color: #9CAEA9;
+  margin-bottom: 20px;
+}
+
+.otp-input {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.otp-input input {
+  width: 45px;
+  height: 50px;
+  font-size: 24px;
+  text-align: center;
+  border: 2px solid #9CAEA9;
+  border-radius: 8px;
+  outline: none;
+}
+
+.submit-btn {
+  background-color: #9CAEA9;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #879993;
+}
+
+.resend {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.resend a {
+  color: #9CAEA9;
+  text-decoration: none;
+}
+
+.resend a:hover {
+  text-decoration: underline;
+}
+
+.timer {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 20px;
+}

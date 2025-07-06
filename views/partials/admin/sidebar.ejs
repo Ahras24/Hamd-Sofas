@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/public/admin/css/sidebar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+<body>
+
+ 
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <h3 class="company-name">HAMD SOFAS</h3>
+    <h2>Admin Panel</h2>
+    
+    <ul>
+      <li><a href="/admin/dashboard"><i class="fa fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="/admin/orders"><i class="fa fa-shopping-cart"></i> Orders</a></li>
+      <li><a href="/admin/category"><i class="fa fa-list"></i> Category</a></li>
+      <li><a href="/admin/Products"><i class="fa fa-box"></i> Products</a></li>
+      <li><a href="/admin/customers"><i class="fa fa-users"></i> Customers</a></li>
+      <li><a href="/admin/offers"><i class="fa fa-gift"></i> Offers</a></li>
+      <li><a href="/admin/coupons"><i class="fa fa-ticket"></i> Coupons</a></li>
+      <li><a href="/admin/sales-report"><i class="fa fa-chart-line"></i> Sales Report</a></li>
+      <li class="logout" id="adminLogoutLink"><a href="/admin/logout"><i class="fa fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+ 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const adminLogoutLink = document.getElementById('adminLogoutLink');
+      
+          adminLogoutLink.addEventListener('click', function (event) {
+              event.preventDefault(); 
+
+              Swal.fire({
+                title:'Are you sure?',
+                text: "Do you really want to logout?",
+                icon: 'warning',
+                showCancelButton:true,
+                confirmButtonColor: '#9CAEA9',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Logout',
+                cancelButtonText: 'Cancel'
+
+              }).then((result) => {
+                if(result.isConfirmed){
+                  window.location.href = '/admin/logout';
+                }
+
+              }).catch((err) => {
+                console.error(`Error while logout : ${err}`);
+                window.location.href = '/admin/dashboard'
+              });
+          });
+        });
+
+
+      </script>

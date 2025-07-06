@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin-Sales Report</title>
+    <link rel="icon" type="image/png" href="/public/images/admin-favicon.jpg">
+    <link rel="stylesheet" href="/public/admin/css/sales-report.css">
+</head>
+<body>
+
+    <%- include("../../views/partials/admin/sidebar")%>
+
+     <div class="sales-container">
+    <h1 class="heading">SALES REPORT</h1>
+
+    <form action="/admin/sales-report/filter" method="post" class="filter-section">
+     <div class="form-group">
+
+      <label for="reportType">Report Type:</label>
+      <select name="reportType" id="reportType" onchange="toggleDateFields()">
+        <option disabled <%= !reportType ? 'selected' : '' %>>Select Type</option>
+        <option value="daily" <%= reportType === 'daily' ? 'selected' : '' %>>Daily</option>
+        <option value="weekly" <%= reportType === 'weekly' ? 'selected' : '' %>>Weekly</option>
+        <option value="monthly" <%= reportType === 'monthly' ? 'selected' : '' %>>Monthly</option>
+        <option value="custom" <%= reportType === 'custom' ? 'selected' : '' %>>Custom</option>
+      </select>
+     </div>
+
+     <div class="custom-date-range" id="customDateRange" style="display: none;">
+     <div class="form-group">
+     <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" name="startDate" value="<%= startDate|| '' %>" />
+     </div>
+
+     <div class="form-group">
+      <label for="endDate">End Date:</label>
+      <input type="date" id="endDate" name="endDate" value="<%= endDate || '' %>" />
+    </div>
+    </div>
+
+    <div class="form-group">
+      <button type="submit" class="accent-btn">Apply Filter</button>
+    </div>
+
+    <div class="form-group">
+      <a href="/admin/sales-report" class="overall-btn">Show Overall Report</a>
+    </div>
+
+  </form>
+
+  <!-- Report Summary -->
+    <div class="report-summary">
+      <div class="summary-box">
+        <h3>Total Sales</h3>
+        <p>₹ <%= totalSales.toLocaleString('en-IN') %></p>
+      </div>
+      <div class="summary-box">
+        <h3>Total Orders</h3>
+        <p><%= totalOrders %></p>
+      </div>
+      <div class="summary-box">
+        <h3>Discounts</h3>
+        <p>₹ <%= totalDiscount.toLocaleString('en-IN') %></p>
+      </div>
+      <div class="summary-box">
+        <h3>Coupons Used</h3>
+        <p><%= couponUsedCount %></p>
+      </div>
+    </div>
+
+    <div class="download-section">
+      <a href="/admin/sales-report/download/pdf?<%= `reportType=${reportType}&startDate=${startDate}&endDate=${endDate}` %>" class="pdf-btn">Download PDF</a>
+      <a href="/admin/sales-report/download/excel?<%= `reportType=${reportType}&startDate=${startDate}&endDate=${endDate}` %>" class="excel-btn">Download Excel</a>
+    </div>
+
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Amount</th>
+          <th>Discount</th>
+          <th>Coupon</th>
+          <th>Payment Method</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if(orders.length > 0 ){ %>
+            <% orders.forEach(order => { %>
+        <tr>
+          <td><%= order.createdAt.toISOString().slice(0, 10) %></td>
+          <td><%= order.customId %></td>
+          <td><%= order.userId?.username || 'Guest' %></td>
+          <td><%= order.grandTotal.toLocaleString('en-IN') %></td>
+          <td><%= order.discount.toLocaleString('en-IN') || 0 %></td>
+          <td><%= order.couponApplied ? order.couponCode : 'N/A' %></td>
+          <td><%= order.paymentMethod.toUpperCase() %></td>
+        </tr>
+      <% }) %>
+      <% } else { %>
+        <tr>
+            <td colspan="6" style="text-align: center; color: #888;">No orders found for selected period.</td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+
+  <script>
+
+    function toggleDateFields(){
+      const reportType = document.getElementById('reportType').value;
+      const customDateRange = document.getElementById('customDateRange');
+
+      customDateRange.style.display = reportType === 'custom' ? 'flex' : 'none';
+    }
+
+    window.addEventListener('DOMContentLoaded', toggleDateFields);
+
+  </script>
+
+
+</body>
+</html>

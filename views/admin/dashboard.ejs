@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Management</title>
+    <link rel="icon" type="image/png" href="/public/images/admin-favicon.jpg">
+    <link rel="stylesheet" href="/public/admin/css/dashboard.css">
+</head>
+<body>
+ 
+<%- include("../../views/partials/admin/sidebar")%>
+
+  <!-- Main Content -->
+<div class="main-content">
+
+  <!-- Dashboard Heading -->
+  <div class="dashboard-header mb-4">
+    <% if (successMessage) { %>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> <%= successMessage %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+
+    <h2>Welcome to Admin Dashboard</h2>
+    <p>Manage your store's data, analytics, and performance here.</p>
+  </div>
+
+  <!-- Filter and Chart Section -->
+  <div class="chart-section mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>Sales Overview</h4>
+      <select id="sales-filter" class="form-select w-auto">
+        <option value="yearly">Yearly</option>
+        <option value="monthly" selected>Monthly</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </div>
+    <canvas id="salesChart" height="100"></canvas>
+  </div>
+
+  <!-- Top Selling Data -->
+  <div class="row">
+
+    <!-- Top Products -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          Top 10 Best-Selling Products
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <% topProducts.forEach((p,index) => { %>
+              <li class="list-group-item d-flex justify-content-between">
+                <span><strong><%= index + 1 %>.</strong> <%= p.product.productName %></span>
+                <span class="badge">Qty: <%= p.totalSold %></span>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Categories -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          Top 5 Best-Selling Categories
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <% topCategories.forEach((c,index) => { %>
+              <li class="list-group-item d-flex justify-content-between">
+                <span><strong><%= index + 1 %>.</strong> <%= c.category.name %></span>                <span class="badge">Qty: <%= c.totalSold %></span>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+  const ctx = document.getElementById('salesChart').getContext('2d');
+  const salesFilter = document.getElementById('sales-filter');
+
+    // 🟡 Confirm it exists
+  if (!salesFilter) {
+    console.error("❌ sales-filter element not found!");
+    return;
+  }
+
+   const monthlySalesData = JSON.parse('<%- JSON.stringify(monthlySales) %>');
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const chartValues = new Array(12).fill(0);
+
+   monthlySalesData.forEach(sale => {
+    const index = sale._id - 1;
+    chartValues[index] = sale.total;
+   });
+
+  const salesChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: monthNames,
+      datasets: [{
+        label: 'Sales Amount',
+        data: chartValues,
+        backgroundColor: 'rgba(156, 174, 169, 0.6)', // Sage Green
+        borderColor: '#9CAEA9',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return '₹' + value.toLocaleString("en-IN");
+            },
+            color: '#2B2B2B'
+          }
+        },
+        x: {
+          ticks: {
+            color: '#2B2B2B'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#2B2B2B'
+          }
+        }
+      }
+    }
+  });
+
+  salesFilter.addEventListener('change', function () {
+    const filter = this.value;
+
+    fetch('/admin/dashboard/filter', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ filter })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+         if (filter === 'monthly') {
+          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          const filledData = new Array(12).fill(0);
+          const monthMap = {
+            Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+            Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+          };
+          data.labels.forEach((label, i) => {
+            const index = monthMap[label];
+            if (index !== undefined) filledData[index] = data.values[i];
+          });
+          salesChart.data.labels = monthNames;
+          salesChart.data.datasets[0].data = filledData;
+
+        } else if (filter === 'weekly') {
+  const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const filledData = new Array(7).fill(0);
+  const dayMap = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6
+  };
+  data.labels.forEach((label, i) => {
+    const index = dayMap[label];
+    if (index !== undefined) filledData[index] = data.values[i];
+  });
+  salesChart.data.labels = dayLabels;
+  salesChart.data.datasets[0].data = filledData;
+
+        } else {
+          // Use dynamic values for yearly/weekly
+          salesChart.data.labels = data.labels;
+          salesChart.data.datasets[0].data = data.values;
+        }
+
+        salesChart.update();
+        }
+    })
+    .catch(error => console.error("chart filter error: ",error))
+  });
+  salesFilter.dispatchEvent(new Event('change'));
+});
+
+
+</script>
+
+</body>
+</html>

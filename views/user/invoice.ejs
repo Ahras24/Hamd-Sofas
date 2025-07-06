@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice - <%= order.customId %></title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 14px;
+      color: #333;
+      padding: 20px;
+    }
+
+    .invoice-box {
+      max-width: 800px;
+      margin: auto;
+      padding: 30px;
+      border: 1px solid #eee;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .brand h2 {
+      margin: 0;
+      color: #2B2B2B;
+    }
+
+    .brand p {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .info div {
+      width: 48%;
+    }
+
+    .info strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #9CAEA9;
+      color: #fff;
+      text-align: left;
+      padding: 10px;
+    }
+
+    td {
+      padding: 10px;
+    }
+
+    .total-box {
+      float: right;
+      width: 40%;
+    }
+
+    .total-box table {
+      border: none;
+    }
+
+    .total-box td {
+      border: none;
+      padding: 6px 10px;
+    }
+
+    .highlight {
+      font-weight: bold;
+      color: #2B2B2B;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice-box">
+    <div class="brand">
+      <h2>🛋️ Hamd Sofas</h2>
+      <p>Crafted Comfort, Naturally Yours</p>
+    </div>
+
+    <div class="info">
+      <div>
+        <strong>Invoice To:</strong>
+        <p>
+          <%= order.userId?.username %><br>
+          <%= order.userId?.email %><br>
+          <%= order.address?.street %>, <%= order.address?.city %><br>
+          <%= order.address?.state %> - <%= order.address?.pincode %><br>
+          Phone: <%= order.address?.phone %>
+        </p>
+      </div>
+      <div>
+        <strong>Invoice Details:</strong>
+        <p>
+          Invoice ID: <%= order.customId %><br>
+          Date: <%= order.createdAt.toDateString() %><br>
+          Payment Status: <%= order.status %>
+        </p>
+      </div>
+    </div>
+
+    <h3>Order Summary</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% order.items.forEach(item => { %>
+          <tr>
+            <td><%= item.product.productName %></td>
+            <td><%= item.quantity %></td>
+            <td>₹<%= item.price %></td>
+            <td>₹<%= item.quantity * item.price %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <div class="total-box">
+      <table>
+        <tr>
+          <td>Subtotal:</td>
+          <td>₹<%= order.subtotal.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <td>Discount:</td>
+          <td>₹<%= order.discount.toFixed(2) %></td>
+        </tr>
+         <tr>
+          <td>Tax:</td>
+          <td>₹<%= order.tax.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <td>Shipping:</td>
+          <td>₹<%= order.shippingCharge.toFixed(2) %></td>
+        </tr>
+        <tr class="highlight">
+          <td>Total:</td>
+          <td><strong>₹<%= order.grandTotal.toFixed(2) %></strong></td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="clear: both;"></div>
+
+    <div class="footer">
+      Thank you for shopping with Hamd Sofas. We hope your furniture brings you joy and comfort!  
+    </div>
+  </div>
+</body>
+</html>

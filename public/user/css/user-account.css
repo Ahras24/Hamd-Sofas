@@ -1,0 +1,336 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  color: #2B2B2B;
+  background-color: #f7f7f7;
+  margin: 0;
+  padding: 0;
+}
+
+.user-account {
+  padding: 40px 20px;
+  background-color: #f7f7f7;
+  min-height: 160vh;
+  position: relative;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.profile-card {
+  background-color: #e8e3dd;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+}
+
+.profile-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.profile-img img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #9CAEA9;
+}
+
+.profile-info h2 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.profile-info p {
+  margin: 4px 0;
+  font-size: 1rem;
+}
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  background-color: #9CAEA9;
+  color: #2B2B2B;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.btn:hover {
+  background-color: #8b9d97;
+}
+
+hr {
+  margin: 30px 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+.logout-form {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: contents; /* Makes the form not interfere with layout */
+}
+
+.logout-btn {
+  
+  display: block;
+  background-color: #c04b4b;
+  color: #fff;
+  
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  text-decoration: none;
+}
+
+.logout-btn:hover {
+  background-color: #a03d3d;
+}
+
+.default-badge {
+  background-color: #d4edda; /* light green */
+  color: #155724;            /* dark green text */
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  margin-left: 20px;
+}
+
+.address-section {
+  margin-bottom: 80px;
+}
+
+.address-section h3 {
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+}
+
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow: hidden;
+}
+
+.address-card {
+  background-color: #ffffff;
+  padding: 20px;
+  border-left: 6px solid #9CAEA9;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.address-card p {
+  margin: 5px 0;
+}
+.address-actions {
+  margin-top: 10px; /* adds space between address details and actions */
+}
+
+.address-actions a {
+  color: #2B2B2B;
+  background-color: #9CAEA9;
+  margin-left: 10px;
+  margin-right: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: background-color 0.3s, color 0.3s;
+  margin-top: 5px; 
+  display: inline-block;
+}
+
+
+.address-actions a:hover {
+  text-decoration: none;
+  background-color: #7b8e8a;
+}
+
+.add-address {
+  width: fit-content;
+  background-color: transparent;
+  border: 2px dashed #9CAEA9;
+  color: #2B2B2B;
+  margin-top: 20px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.add-address:hover {
+  background-color: #9CAEA9;
+  border-style: solid;
+}
+
+form {
+  max-width: 500px;
+  margin: 0 auto;
+  background-color: #f7f6f2;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  padding-top: 70px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 30px;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 12px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* === Address Modal Scoped Styles === */
+.address-modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  padding-top: 70px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.address-modal .modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 30px;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 12px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  
+  max-height: 100vh;              /* Constrain height to viewport */
+  overflow-y: auto;              /* Allow scrolling if content overflows */
+  padding-bottom: 80px; 
+}
+
+.address-modal .close {
+  color: #aaa;
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.address-modal .close:hover,
+.address-modal .close:focus {
+  color: black;
+}
+
+.address-modal .form-group {
+  margin-bottom: 15px;
+}
+
+.address-modal label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #2B2B2B;
+}
+
+.address-modal input[type="text"],
+.address-modal input[type="tel"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.address-modal .error-message {
+  color: red;
+  font-size: 13px;
+  margin-top: 3px;
+  display: block;
+}
+
+.address-modal .submit-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #9CAEA9;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.address-modal .submit-btn:hover {
+  background-color: #7b8e8a;
+}
+
+.error-message {
+  color: red;
+  font-size: 13px;
+  margin-top: 5px;
+  display: block;
+}
+
+footer {
+  position: relative;
+  z-index: 1;
+}

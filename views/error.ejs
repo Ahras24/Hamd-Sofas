@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Page</title>
+    <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+
+    <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #e8e3dd;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #2B2B2B;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .error-container {
+      max-width: 600px;
+      padding: 40px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border-top: 6px solid #9CAEA9;
+    }
+
+    .error-container h2 {
+      font-size: 100px;
+      margin: 0;
+      color: #9CAEA9;
+    }
+
+    .error-container h2 {
+      font-size: 28px;
+      margin-top: 10px;
+    }
+
+    .error-container p {
+      margin: 20px 0;
+      font-size: 18px;
+    }
+
+    .home-btn {
+      padding: 12px 24px;
+      background-color: #9CAEA9;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: 0.3s ease;
+    }
+
+    .home-btn:hover {
+      background-color: #7f9c9a;
+    }
+  </style>
+</head>
+
+<body> 
+  <div class="error-container">
+    <h2>Error: <%= statusCode %></h1>
+    <h3><%= errorMessage %></h2>
+    <p><small>URL: <%= path %></small></p>
+    <p>Oops! Something went wrong on Your side.<br>Please try again later or go back home.</p>
+    <a href="/user/home" class="home-btn">Go to Home</a>
+  </div>
+             
+</body>
+</html>

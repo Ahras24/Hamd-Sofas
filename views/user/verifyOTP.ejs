@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP Page</title>
+    <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+    <link rel="stylesheet" href="/public/user/css/verifyOTP.css">
+</head>
+<body>
+    <%- include("../../views/partials/user/navbar")%>
+
+   <div class="page-content">
+    <div class="otp-container">
+
+      <% if (successMessage) { %>
+        <div style="color: green; font-weight: bold; margin-bottom: 10px;">
+          <%= successMessage %>
+        </div>
+      <% } %>
+      
+      <% if (errorMessage) { %>
+        <div style="color: red; font-weight: bold; margin-bottom: 10px;">
+          <%= errorMessage %>
+        </div>
+      <% } %>
+
+        <h2>OTP Verification</h2>
+        <p>6-digit verification code sent to your email.</p>
+        
+        <form id="verificationForm" action="/user/verify-otp" method="post" >
+          <div class="otp-inputs" id="otp-inputs">
+            <input type="text" name="otp1" maxlength="1" required>
+            <input type="text" name="otp2" maxlength="1" required>
+            <input type="text" name="otp3" maxlength="1" required>
+            <input type="text" name="otp4" maxlength="1" required>
+            <input type="text" name="otp5" maxlength="1" required>
+            <input type="text" name="otp6" maxlength="1" required>
+          </div>
+          <button type="submit">Verify</button>
+        </form>
+    
+        <div class="timer" id="timer">Time remaining: 01:00</div>
+    
+        <div class="resend">
+          <form action="/user/resend-otp" method="POST">
+            <button type="submit" id="resendBtn" disabled>Resend OTP</button>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+        <%- include("../../views/partials/user/footer")%>
+
+      <script>
+
+        // Auto-focus handling
+        const inputs = document.querySelectorAll('.otp-inputs input');
+        inputs.forEach((input, index) => {
+          input.addEventListener('input', () => {
+            if (input.value.length === 1 && index < inputs.length - 1) {
+              inputs[index + 1].focus();
+            }
+          });
+    
+          input.addEventListener('keydown', (e) => {
+            if (e.key === "Backspace" && input.value === "" && index > 0) {
+              inputs[index - 1].focus();
+            }
+          });
+        });
+    
+        // Countdown timer
+        let countdown = 60 ; // 60 minutes in seconds
+        const timerDisplay = document.getElementById('timer');
+        const resendBtn = document.getElementById('resendBtn');
+    
+        function updateTimer() {
+          const minutes = String(Math.floor(countdown / 60)).padStart(2, '0');
+          const seconds = String(countdown % 60).padStart(2, '0');
+          timerDisplay.textContent = `Time remaining: ${minutes}:${seconds}`;
+    
+          if (countdown <= 0) {
+            clearInterval(timerInterval);
+            resendBtn.disabled = false;
+            timerDisplay.textContent = 'You can now resend the OTP.';
+          }
+    
+          countdown--;
+        }
+    
+        const timerInterval = setInterval(updateTimer, 1000);
+      </script>
+    
+</body>
+</html>

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout Page</title>
+  <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+  <link rel="stylesheet" href="/public/user/css/checkout.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <%- include("../../views/partials/user/navbar")%>
+
+<div class="checkout-stepper">
+  <div class="step active">
+    <a href="/user/cart" class="step-link">
+    <div class="circle">1</div>
+    <div class="label">Cart</div>
+    </a>
+  </div>
+  <div class="line-container">
+    <div class="line-fill" style="width: 100%;"></div>
+    <div class="line-background"></div>
+  </div>
+  <div class="step active">
+    <a href="/user/cart" class="step-link">
+    <div class="circle">2</div>
+    <div class="label">Checkout</div>
+    </a>
+  </div>
+  <div class="line-container">
+    <div class="line-fill second"></div>
+    <div class="line-background"></div>
+  </div>
+  <div class="step">
+    <div class="circle">3</div>
+    <div class="label">Payment</div>
+  </div>
+</div>
+
+  <div class="checkout-container">
+  
+   <div class="address-section">
+        <h3>Select Your Address To Deliver</h3>
+      
+        <form action="/user/payment-option" method="POST">
+        <div class="address-list">
+          <% if(addresses.length > 0 ) { %>
+            <% addresses.forEach((address,index) => { %>
+              <label for="address-<%= index %>">
+             <div class="address-card <%= index === 0 ? 'selected' : '' %>" data-id="<%= address._id %>">
+                <input 
+                type="radio" 
+                id="address-<%= index %>" 
+                name="selectedAddressId" 
+                value="<%= address._id %>" 
+                style="margin-bottom: 8px;" 
+                <%= index === 0 ? 'checked' : '' %> 
+              />
+             <p><strong><%= address.fullName %> <% if(address.isDefault) { %><span class="default-badge">Default</span><% } %></strong></p>
+             <p><%= address.street %>, <%= address.city %>, <%= address.state %></p>
+            <p>PIN: <%= address.pincode %>, <%= address.country %></p>
+            <p>Phone: <%= address.phone %></p>
+
+            <div class="address-actions">
+              <a href="#" onclick="openEditAddressModal('<%= address._id %>')">Edit</a> |
+               <% if (!address.isDefault) { %>
+               <a href="#" onclick="confirmSetDefault('<%= address._id %>')">Set as Default</a>
+                <% } %>
+            </div>
+          </div>
+          </label>
+          <% }) %>
+           <% } else { %>
+            <p>No addresses found.</p>
+            <% } %>
+
+          <button type="button" class="btn add-address" onclick="openAddressModal()">+ Add New Address</button>
+        </div>
+      </div>
+
+<!-- Order Summary Section -->
+<div class="order-summary-container">
+  
+  <h3>Order Summary</h3>
+    <div class="order-summary-header">
+      <span class="total-items">Total Items: <%= totalItems %></span>
+    </div>
+  <div class="order-items">
+    <% cartItems.forEach(item => { %>
+      <div class="summary-item">
+        <img src="<%= item.productId.productImage[0] %>" alt="Product Image" />
+        <div class="item-details">
+          <p><%= item.productId.productName %></p>
+          <p>Qty: <%= item.quantity %></p>
+          <p>Price: ₹<%= ((item.productId.finalPrice || item.productId.salePrice) * item.quantity).toLocaleString('en-IN') %></p>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+    <div class="price-breakdown">
+      <div class="line-item"><span>Subtotal:</span> <span>₹<%= subtotal.toLocaleString('en-IN') %></span></div>
+      <div class="line-item"><span>Coupon Discount:</span> <span class="couponDiscount" id="couponDiscount">-₹<%= discount || 0 %></span></div>
+      <div class="line-item"><span>Tax-10%:</span> <span class="taxAmount">+₹<%= tax.toLocaleString('en-IN') || 0 %></span></div>
+      <div class="line-item"><span>Shipping:</span> <span><%= shippingCharge === 0 ? "Free" : `₹${shippingCharge}` %></span></div>
+      <hr />
+      <div class="line-item total"><span>Grand Total</span> <span id="grandTotal">₹<%= grandTotal.toLocaleString('en-IN') %></span></div>
+    </div>
+
+    <button type="submit" class="place-order-btn" id="continueBtn">Continue to Payment</button>
+  </form>
+
+    <hr class="section-divider" />
+
+      <div class="coupon-section">
+    <div class="available-coupons">
+      <h3>Available Coupons</h3>
+      <% coupons.forEach(coupon => { %> 
+        <div class="coupon-card">
+         <strong><%= coupon.couponCode %></strong> - 
+         <%= coupon.discountType === 'flat' ? '₹' + coupon.discountValue : coupon.discountValue + '%' %> OFF on orders above ₹<%= coupon.minCartValue %>
+         <br>
+         <small>Valid till <%= coupon.expiry.toDateString() %></small>
+        </div>
+       <% }) %> 
+    </div>
+
+    <label>Apply Coupon Code:</label>
+    <input type="text" id="couponCodeInput" name="couponCode" placeholder="Enter coupon code">
+    <button class="couponBtn" id="applyCouponBtn" onclick="applyCoupon()">Apply</button>
+   
+    <button class="couponBtn removeBtn" id="removeCouponBtn" onclick="removeCoupon()">Remove Coupon</button>
+
+  </div>
+
+</div>
+</div>
+
+<!-- Edit Address Modal -->
+<div id="editAddressModal" class="address-modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeEditAddressModal()">&times;</span>
+    <h2>Edit Address</h2>
+    <form id="editAddressForm" method="post" action="">
+      <div class="form-group">
+        <label for="editFullName">Full Name</label>
+        <input type="text" id="editFullName" name="fullName" >
+        <span class="error-message" id="editNameError"></span>
+      </div>
+      <div class="form-group">
+        <label for="editPhone">Phone Number</label>
+        <input type="tel" id="editPhone" name="phone" >
+        <span class="error-message" id="editPhoneError"></span>
+      </div>
+      <div class="form-group">
+        <label for="editStreet">Street</label>
+        <input type="text" id="editStreet" name="street" >
+        <span class="error-message" id="editStreetError"></span>
+      </div>
+      <div class="form-group">
+        <label for="editCity">City</label>
+        <input type="text" id="editCity" name="city" >
+        <span class="error-message" id="editCityError"></span>
+      </div>
+      <div class="form-group">
+        <label for="editState">State</label>
+        <input type="text" id="editState" name="state" >
+        <span class="error-message" id="editStateError"></span>
+      </div>
+      <div class="form-group">
+        <label for="editPincode">Pincode</label>
+        <input type="text" id="editPincode" name="pincode" >
+        <span class="error-message" id="editPincodeError"></span>
+      </div>
+      <div class="form-group">
+        <label for="editCountry">Country</label>
+        <input type="text" id="editCountry" name="country" >
+        <span class="error-message" id="editCountryError"></span>
+      </div>
+
+      <input type="hidden" id="editAddressId" name="addressId" value="<%= addresses._id %>">
+
+      <button type="submit" class="submit-btn">Update Address</button>
+    </form>
+  </div>
+</div>
+
+<!--Add Address Modal -->
+<div id="addressModal" class="address-modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeAddressModal()">&times;</span>
+    <h2>Add New Address</h2>
+    <form id="addressForm" method="POST" action="/user/add-address">
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input type="text" name="fullName" id="fullName"  />
+        <span class="error-message" id="nameError"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input type="tel" name="phone" id="phone"  />
+        <span class="error-message" id="phoneError"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="street">Street</label>
+        <input type="text" name="street" id="street"  />
+        <span class="error-message" id="streetError"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="city">City</label>
+        <input type="text" name="city" id="city"  />
+        <span class="error-message" id="cityError"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="state">State</label>
+        <input type="text" name="state" id="state"  />
+        <span class="error-message" id="stateError"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="pincode">Pincode</label>
+        <input type="text" name="pincode" id="pincode"  />
+        <span class="error-message" id="pincodeError"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="country">Country</label>
+        <input type="text" name="country" id="country"  />
+        <span class="error-message" id="countryError"></span>
+      </div>
+
+      <button type="submit" class="submit-btn">Save Address</button>
+    </form>
+  </div>
+</div>
+
+  <%- include("../../views/partials/user/footer")%>
+
+  <script>
+    const addresses = <%-JSON.stringify(addresses || []) %>;
+</script>
+
+<% if (defaultSet) { %>
+<script>
+  Swal.fire({
+    icon: 'success',
+    title: 'Default address set!',
+    showConfirmButton: false,
+    timer: 1500
+  });
+</script>
+<% } %>
+
+  <script>
+
+function applyCoupon() {
+  const couponCode = document.getElementById('couponCodeInput').value;
+
+  fetch('/user/apply-coupon', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest"
+    },
+    body: JSON.stringify({ couponCode })
+  })
+
+  .then(res => res.json())
+  .then(data => {
+    if(data.success) {
+      Swal.fire("Coupon Applied", data.message, "success");
+
+      document.getElementById('removeCouponBtn').style.display = 'inline-block';
+
+      document.getElementById('couponDiscount').innerText = `-₹${data.discountAmount}`;
+      document.getElementById('grandTotal').innerText = `₹${data.newGrandTotal.toLocaleString('en-IN')}`;
+
+    } else {
+      Swal.fire('error', data.message, 'error');
+    }
+  })
+  .catch(error => {
+    Swal.fire("Error", "Something went wrong", "error");
+    console.error("Coupon apply error: ",error);
+  });
+}
+
+function removeCoupon (){
+  fetch('/user/remove-coupon',{
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest"
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log(data)
+    if(data.success){
+      Swal.fire("Coupon removed", data.message, "success");
+
+      document.getElementById('couponDiscount').innerText = '-₹0';
+      document.getElementById('grandTotal').innerText = `₹${data.grandTotal.toLocaleString('en-IN')}`;
+
+      document.getElementById('couponCodeInput').value = '';
+
+      const removeBtn = document.getElementById('removeCouponBtn');
+      if(removeBtn) removeBtn.style.display = 'none';
+
+    }else {
+      Swal.fire('Error', data.message, 'error');
+    }
+  })
+  .catch(error => {
+    console.error("Remove coupon error: ",error);
+    Swal.fire('Error', "Something went wrong", "error");
+  });
+}
+
+function confirmSetDefault(addressId) {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "Do you want to set this address as default?",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#999',
+    confirmButtonText: 'Yes, set it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/user/set-default-address/${addressId}`, {
+        method: 'PATCH'
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Default address updated!',
+              showConfirmButton: false,
+              timer: 1500
+            });
+
+            updateDefaultBadge(addressId);
+          } else {
+            Swal.fire('Error', 'Could not update default address.', 'error');
+          }
+        })
+        .catch(() => {
+          Swal.fire('Error', 'Something went wrong.', 'error');
+        });
+    }
+  });
+}
+
+function updateDefaultBadge(defaultId) {
+  // Remove all default badges and "Set as Default" links
+  document.querySelectorAll('.default-badge').forEach(badge => badge.remove());
+  document.querySelectorAll('.address-actions').forEach(actions => {
+    const links = actions.querySelectorAll('a');
+    links.forEach(link => {
+      if (link.textContent.includes('Set as Default')) {
+        link.style.display = 'inline';
+      }
+    });
+  });
+
+  // Add badge to the new default and hide the link
+  const allAddressCards = document.querySelectorAll('.address-card');
+  allAddressCards.forEach(card => {
+    if (card.innerHTML.includes(defaultId)) {
+      const nameTag = card.querySelector('strong');
+      const badge = document.createElement('span');
+      badge.className = 'default-badge';
+      badge.textContent = 'Default';
+      nameTag.appendChild(badge);
+
+      const actionLinks = card.querySelector('.address-actions');
+      const links = actionLinks.querySelectorAll('a');
+      links.forEach(link => {
+        if (link.textContent.includes('Set as Default')) {
+          link.style.display = 'none';
+        }
+      });
+    }
+  });
+}
+
+  // Edit Address Modal 
+function openEditAddressModal(addressId) {
+    const address = addresses.find(addr => addr._id === addressId);
+
+  document.getElementById("editFullName").value = address.fullName || '';
+  document.getElementById("editPhone").value = address.phone || '';
+  document.getElementById("editStreet").value = address.street || '';
+  document.getElementById("editCity").value = address.city || '';
+  document.getElementById("editState").value = address.state || '';
+  document.getElementById("editPincode").value = address.pincode || '';
+  document.getElementById("editCountry").value = address.country || '';
+  document.getElementById("editAddressId").value = addressId;
+
+  document.getElementById("editAddressForm").action = `/user/edit-address/${addressId}`;
+  // Show the modal
+  document.getElementById("editAddressModal").style.display = "block";
+}
+
+function closeEditAddressModal() {
+    document.getElementById('editAddressModal').style.display = 'none';
+    document.getElementById('editAddressForm').reset();
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+}
+
+window.onclick = function(event) {
+    const editModal = document.getElementById('editAddressModal');
+    if (event.target == editModal) {
+        closeEditAddressModal();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('editAddressForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault(); 
+
+  let isValid = true;
+
+  // Clear previous error messages
+  document.getElementById('editNameError').textContent = '';
+  document.getElementById('editPhoneError').textContent = '';
+  document.getElementById('editStreetError').textContent = '';
+  document.getElementById('editCityError').textContent = '';
+  document.getElementById('editStateError').textContent = '';
+  document.getElementById('editPincodeError').textContent = '';
+  document.getElementById('editCountryError').textContent = '';
+
+  const fullName = document.getElementById('editFullName').value.trim();
+  const phone = document.getElementById('editPhone').value.trim();
+  const street = document.getElementById('editStreet').value.trim();
+  const city = document.getElementById('editCity').value.trim();
+  const state = document.getElementById('editState').value.trim();
+  const pincode = document.getElementById('editPincode').value.trim();
+  const country= document.getElementById('editCountry').value.trim();
+
+  if (fullName.length < 3) {
+    document.getElementById('editNameError').textContent = 'Enter full name';
+    isValid = false;
+  }
+  if (!/^\d{10}$/.test(phone)) {
+    document.getElementById('editPhoneError').textContent = 'Enter valid 10-digit phone';
+    isValid = false;
+  }
+  if (street === '') {
+    document.getElementById('editStreetError').textContent = 'Street is required';
+    isValid = false;
+  }
+  if (city === '') {
+    document.getElementById('editCityError').textContent = 'City is required';
+    isValid = false;
+  }
+  if (state === '') {
+    document.getElementById('editStateError').textContent = 'State is required';
+    isValid = false;
+  }
+  if (!/^\d{6}$/.test(pincode)) {
+    document.getElementById('editPincodeError').textContent = 'Enter 6-digit PIN code';
+    isValid = false;
+  }
+    if (country === '') {
+    document.getElementById('editCountryError').textContent = 'Country is required';
+    isValid = false;
+  } 
+    
+   if (!isValid) {
+       return;
+  }
+
+  const formData = new URLSearchParams(new FormData(this));
+  const addressId = document.getElementById('editAddressId').value;
+
+  fetch(`/user/edit-address/${addressId}`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
+  })
+
+ .then(response =>  response.json())
+  .then(data => {
+    if (data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: data.message,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#28a745'
+      }).then(() => {
+        window.location.href = '/user/checkout';
+      });
+  }
+})
+  .catch(error => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error!',
+      text: 'Failed to update address',
+      confirmButtonText: 'Try Again',
+      confirmButtonColor: '#dc3545'
+    });
+  });
+});
+
+}
+})
+
+// Add Address Modal
+   function openAddressModal() {
+    document.getElementById('addressModal').style.display = 'block';
+  }
+
+  function closeAddressModal() {
+    document.getElementById('addressModal').style.display = 'none';
+    document.getElementById('addressForm').reset();
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('addressModal');
+    if (event.target == modal) {
+      closeAddressModal();
+    }
+  }
+
+ document.getElementById('addressForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    let isValid = true;
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const street = document.getElementById('street').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const pincode = document.getElementById('pincode').value.trim();
+    const country = document.getElementById('country').value.trim();
+
+    if (fullName.length < 3) {
+      document.getElementById('nameError').textContent = 'Enter full name';
+      isValid = false;
+    }
+    if (!/^\d{10}$/.test(phone)) {
+      document.getElementById('phoneError').textContent = 'Enter valid 10-digit phone';
+      isValid = false;
+    }
+    if (street === '') {
+      document.getElementById('streetError').textContent = 'Street is required';
+      isValid = false;
+    }
+    if (city === '') {
+      document.getElementById('cityError').textContent = 'City is required';
+      isValid = false;
+    }
+    if (state === '') {
+      document.getElementById('stateError').textContent = 'State is required';
+      isValid = false;
+    }
+    if (!/^\d{6}$/.test(pincode)) {
+      document.getElementById('pincodeError').textContent = 'Enter 6-digit PIN code';
+      isValid = false;
+    }
+    if (country === '') {
+      document.getElementById('countryError').textContent = 'Country is required';
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    // Send form data using fetch
+  const formData = new URLSearchParams(new FormData(this));
+
+  fetch('/user/add-address', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: data.message,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#28a745'
+        }).then(() => {
+          window.location.href = '/user/checkout';
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed!',
+          text: data.message,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Something went wrong. Please try again later.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#dc3545'
+      });
+    });
+    
+  });
+
+document.getElementById('continueBtn').addEventListener('click', function (e) {
+  
+
+  const selectedAddress = document.querySelector('input[name="selectedAddressId"]:checked');
+
+  if(!selectedAddress){
+    e.preventDefault();
+    Swal.fire({
+      icon: 'warning',
+      title: '"Please select a delivery address before proceeding.',
+      confirmButtonColor: '#9CAEA9'
+    });
+  } else {
+    document.getElementById("selectedAddressId").value = selectedAddress.value;
+  }
+  
+});
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cart page</title>
+  <link rel="stylesheet" href="/public/user/css/cart.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+
+</head>
+<body>
+
+    <%- include("../../views/partials/user/navbar")%>
+
+      <div class="continue-btn">
+         <a href="/user/shop" class="continue-shop-btn">Continue Shopping</a>
+       </div>
+
+ <div class="checkout-stepper">
+  <div class="step active">
+    <div class="circle">1</div>
+    <div class="label">Cart</div>
+  </div>
+  <div class="line-container">
+    <div class="line-fill"></div>
+    <div class="line-background"></div>
+  </div>
+  <div class="step">
+    <div class="circle">2</div>
+    <div class="label">Checkout</div>
+  </div>
+  <div class="line-container">
+    <div class="line-fill second"></div>
+    <div class="line-background"></div>
+  </div>
+  <div class="step">
+    <div class="circle">3</div>
+    <div class="label">Payment</div>
+  </div>
+</div>
+
+  <div class="cart-container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="/user/shop">Shop</a> / <span>My Cart</span>
+    </div>
+
+    <div class="cart-wrapper">
+      <!-- Left: Cart Items -->
+         <div class="empty-cart <%= cartItems.length === 0 ? '' : 'hidden' %>" id="empty-cart">
+                <h2>Your cart is empty 🛒</h2>
+                <a href="/user/shop" class="continue-shopping-btn">Continue Shopping</a>
+            </div>
+
+      <div class="cart-left <%= cartItems.length === 0 ? 'hidden' : '' %>" id="cart-left">
+          <% let isOutOfStock = false; %>
+
+      <% if(cartItems.length > 0) { %>
+        <h2>My Cart (<%= cartItems.length %>)</h2>
+
+      <% cartItems.forEach(item => { 
+        const product = item.productId;
+        const outOfStock  = product.stock === 0;
+       if (outOfStock) isOutOfStock = true;
+       %>
+        <div class="cart-item"
+         id="item-<%= item.productId._id %>"
+         data-regular="<%= item.productId.regularPrice %>" 
+         data-sale="<%= item.productId.salePrice %>"
+         data-final="<%= item.productId.finalPrice || item.productId.salePrice %>"
+         data-discount="<%= item.appliedOfferDiscount || 0 %>"
+         data-qty="<%= item.quantity %>">
+        <a href="/user/product-details/<%= item.productId._id %>">
+          <img class="product-img" src="<%= item.productId.productImage[0] %>" alt="Sofa Product Image">
+        
+          <div class="item-details">
+            <h3><%= item.productId.productName %></h3>
+            </a>
+            
+            <div class="quantity-price">
+              <div class="quantity">
+                <button class="qty-btn" onclick="updateCartQuantity('<%= item.productId._id %>', -1, this)">-</button>
+                <input type="text" value="<%= item.quantity %>" readonly>
+                 <button class="qty-btn" onclick="updateCartQuantity('<%= item.productId._id %>', 1, this)">+</button>
+              </div>
+
+              <div class="price">
+                <span class="strike regular-price">₹<%= (item.productId.regularPrice * item.quantity).toLocaleString('en-IN') %></span>
+                <span class="item-total">₹<%= (item.productId.salePrice * item.quantity).toLocaleString('en-IN') %></span>
+
+                <% if(item.productId.appliedOfferDiscount && item.productId.appliedOfferDiscount > 0) { %>
+                 <span class="final-price">Now: ₹<%= ((item.productId.finalPrice || item.productId.salePrice) * item.quantity).toLocaleString('en-IN') %></span>
+                 <span class="offer-tag">~<%= item.productId.appliedOfferDiscount %>% OFF</span>
+                <% } %>
+              </div>
+            </div>
+
+            <div class="actions">
+              <a href="#" class="add-to-wishlist" data-id="<%= item.productId._id %>">
+                <i class="fa-regular fa-heart"></i> Add to Wishlist
+               </a>
+              <a href="#" class="remove-from-cart" data-id="<%= item.productId._id %>">
+                <i class="fa-solid fa-trash"></i> Remove
+              </a>
+            </div>
+
+          <% if (isOutOfStock) { %>
+           <p class="error-msg" style="color: red;">This product is out of stock</p>
+          <% } %>
+
+          </div>
+        </div>
+      <% }) %>
+      <% } %>
+
+</div>
+
+     <!-- Right: order summary-->
+
+     <div class="cart-right <%= cartItems.length === 0 ? 'hidden' : '' %>" id="cart-right">
+          <h3>Order Summary</h3>
+
+        <div class="summary-line">
+          <span>Subtotal:</span>
+          <span id="subtotal-amount">₹<%= subtotal.toLocaleString('en-IN') %></span>
+        </div>
+
+        <div class="summary-line">
+          <span>Offer Discount:</span>
+          <span class="offerDiscount" id="offer-discount">- ₹<%= offerDiscount.toLocaleString('en-IN') %></span>
+        </div>
+
+        <div class="summary-line">
+          <span>Tax:10%</span>
+          <span class="tax-amount" id="tax-amount">+ ₹<%= tax.toLocaleString('en-IN') %></span>
+        </div>
+        <hr>
+        <div class="summary-total">
+          <strong>Order Total:</strong>
+          <strong id="total-amount">₹<%= orderTotal.toLocaleString('en-IN') %></strong>
+        </div>
+
+        <div class="checkout-button-container">
+          <% if (isOutOfStock) { %>
+            <a href="" class="proceed-checkout-btn" disabled style="background-color: gray; cursor: not-allowed;">
+      Cannot Proceed – Remove Out of Stock Items
+      </a>
+     <% } else { %>
+          <a href="/user/checkout" class="proceed-checkout-btn">Proceed to Checkout</a>
+            <% } %>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <%- include("../../views/partials/user/footer")%>
+
+  <script>
+
+document.querySelectorAll('.remove-from-cart').forEach(button => {
+      button.addEventListener('click', async function (e) {
+        e.preventDefault();
+
+        const productId = button.dataset.id;
+
+        Swal.fire({
+        title: "Are you sure?",
+        text: "You want to remove this item from cart?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#e74c3c",
+        cancelButtonColor: "#aaa",
+        confirmButtonText: "Yes, remove it!"
+
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const res = await fetch('/user/cart/remove', {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ productId })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+              // Remove item from DOM
+              const itemElem = document.getElementById(`item-${productId}`);
+              if (itemElem) itemElem.remove();
+
+              updateCartTotals();
+
+              Swal.fire("Removed!", "Product removed from cart.", "success");
+            } else {
+              Swal.fire('Error', data.message || 'Failed to remove item.', 'error');
+            }
+
+          } catch (err) {
+  
+            Swal.fire('Error!', 'Something went wrong.', 'error');
+          }
+        }
+      });
+    });
+});
+
+document.querySelectorAll('.add-to-wishlist').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const productId = btn.getAttribute('data-id');
+
+    const confirm = await Swal.fire({
+      title: 'Add to Wishlist?',
+      text: 'Do you want to add this product to your wishlist?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#9CAEA9',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, add it!'
+    });
+
+    if (confirm.isConfirmed) {
+      fetch('/user/add-to-wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Added!',
+            text: data.message || 'Product added to wishlist.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          throw new Error(data.message || 'Something went wrong.');
+        }
+      })
+      .catch(err => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Failed to add to wishlist.'
+        });
+      });
+    }
+  });
+});
+
+function updateCartTotals() {
+  let regularTotal = 0;
+  let saleTotal = 0;
+  let finalTotal = 0;
+  let subtotal = 0;
+  let tax = 0;
+  let discountTotal = 0;
+
+  const items = document.querySelectorAll('.cart-item');
+  if (items.length === 0) {
+
+    document.getElementById('cart-left')?.classList.add('hidden');
+    document.getElementById('cart-right')?.classList.add('hidden');
+
+    document.getElementById('empty-cart')?.classList.remove('hidden');
+
+    return;
+  }
+
+  items.forEach(item => {
+    const qty = parseInt(item.dataset.qty);
+    const regular = parseFloat(item.dataset.regular);
+    const sale = parseFloat(item.dataset.sale);
+    const final = parseFloat(item.dataset.final || item.dataset.sale);
+
+    const itemRegularTotal = regular * qty;
+    const itemSaleTotal = sale * qty;
+    const itemFinalTotal = final * qty;
+    const itemDiscount = itemSaleTotal - itemFinalTotal;
+
+    subtotal += itemSaleTotal;
+    regularTotal += itemRegularTotal;
+    saleTotal += itemSaleTotal;
+    finalTotal += itemFinalTotal;
+    discountTotal += itemDiscount;
+  });
+
+  const taxableAmount = finalTotal;
+  tax = Math.round(taxableAmount * 0.10);
+  const orderTotal = (subtotal + tax) - discountTotal;
+  const formatINR = n => `₹${n.toLocaleString('en-IN')}`;
+
+  const regularElem = document.getElementById('regular-price');
+  const saleElem = document.getElementById('sale-price');
+  const finalElem = document.getElementById('final-price');
+  const subtotalElem = document.getElementById('subtotal-amount');
+  const discountElem = document.getElementById('offer-discount');
+  const taxElem = document.getElementById('tax-amount');
+  const totalElem = document.getElementById('total-amount');
+
+  if (regularElem) regularElem.textContent = formatINR(regularTotal);
+  if (saleElem) saleElem.textContent = formatINR(saleTotal);
+  if (finalElem) finalElem.textContent = `Now: ${formatINR(finalTotal)}`;
+  if (subtotalElem) subtotalElem.textContent = formatINR(subtotal);
+  if (discountElem) discountElem.textContent = `- ${formatINR(discountTotal)}`;
+  if (taxElem) taxElem.textContent = `+ ${formatINR(tax)}`;
+  if (totalElem) totalElem.textContent = formatINR(orderTotal);
+}
+
+function updateCartQuantity(productId, change, btnElement) {
+  const quantityInput = btnElement.parentElement.querySelector('input');
+  const currentQty = parseInt(quantityInput.value);
+  const newQty = currentQty + change;
+  const MAX_QTY_PER_PRODUCT = 5;
+
+  if (newQty < 1) {
+    Swal.fire({
+      title: 'Remove Item?',
+      text: 'Quantity will be 0. Do you want to remove this product from your cart?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#9CAEA9',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, remove it'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        sendCartUpdate(productId, change, btnElement);
+      }
+    });
+  } else if (newQty > MAX_QTY_PER_PRODUCT) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Limit Reached',
+      text: `You can only buy up to ${MAX_QTY_PER_PRODUCT} of this item.`,
+    });
+  } else {
+    sendCartUpdate(productId, change, btnElement);
+  }
+}
+
+function sendCartUpdate(productId, change, btnElement) {
+  fetch('/user/cart/update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ productId, change })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const quantityInput = btnElement.parentElement.querySelector('input');
+        const itemElement = btnElement.closest('.cart-item');
+
+        if (data.removed) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Removed!',
+            text: 'Item removed from your cart.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+
+          if (itemElement) itemElement.remove();
+        } else {
+          const newQty = parseInt(quantityInput.value) + change;
+          quantityInput.value = newQty;
+
+          if (itemElement) {
+            itemElement.dataset.qty = newQty;
+
+            // Price values from data attributes
+            const regular = parseFloat(itemElement.dataset.regular);
+            const sale = parseFloat(itemElement.dataset.sale);
+            const final = parseFloat(itemElement.dataset.final || itemElement.dataset.sale);
+            const formatINR = n => `₹${n.toLocaleString('en-IN')}`;
+
+            // DOM elements
+            const regularPriceElem = itemElement.querySelector('.regular-price');
+            const itemTotalElem = itemElement.querySelector('.item-total');
+            const finalPriceElem = itemElement.querySelector('.final-price');
+
+            if (regularPriceElem) regularPriceElem.textContent = formatINR(regular * newQty);
+            if (itemTotalElem) itemTotalElem.textContent = formatINR(sale * newQty);
+            if (finalPriceElem) finalPriceElem.textContent = `Now: ${formatINR(final * newQty)}`;
+          }
+        }
+
+        updateCartTotals();
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Stock Limit',
+          text: data.message || 'Cannot increase quantity beyond stock'
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Cart Update Error:", err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Something went wrong.'
+      });
+    });
+}
+
+
+
+
+</script>
+    
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Details Page</title>
+  <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+  <link rel="stylesheet" href="/public/user/css/order-details.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+ 
+  <%- include("../../views/partials/user/navbar") %>
+
+        <div class="back-btn">
+         <a href="/user/orders" class="back-order-btn">Back to All Orders</a>
+       </div>
+
+
+  <div class="order-details-container">
+
+    <!-- ORDER SUMMARY -->
+    <div class="order-header">
+      <h2>Order Details</h2>
+      <p><strong>Order ID:</strong> <%= order.customId %> </p>
+      <p><strong>Status:</strong> 
+        <span class="status <%= order.status.toLowerCase().replace(/\s/g, '-') %>">
+          <%= order.status.toUpperCase() %>
+        </span>
+      </p>
+      <p><strong>Ordered Date:</strong> <%= order.createdAt.toDateString() %></p>
+      <p><strong>Payment Method:</strong> 
+        <span class="payment-method-badge">
+        <%= order.paymentMethod ==='cod' ? 'Cash on Delivery' :
+            order.paymentMethod === 'razorpay' ? 'Paid via Razorpay' :
+            order.paymentMethod === 'wallet' ? 'Wallet Payment' : 
+            order.paymentMethod %>
+        </span>
+       </p>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="order-main-grid">
+      <!-- LEFT: Product List -->
+      <div class="order-left">
+        <h3>Ordered Products</h3>
+        <% order.items.forEach(item => { %>
+          <% if (item.product) { %>
+        <div class="product-card">
+          <img src="<%= item.product.productImage[0] %>" alt="Product Image" />
+          <div class="product-info">
+            <p><strong>Name:</strong> <%= item.product.productName %></p>
+            <p><strong>Quantity:</strong> <%= item.quantity %></p>
+            <p><strong>Price:</strong> ₹<%= item.price.toLocaleString('en-IN') %></p>
+          
+        <p><strong>Status:</strong> 
+          <span class="status <%= item.status.toLowerCase().replace(/\s/g, '-') %>">
+            <%= item.status.toUpperCase() %>
+          </span>
+        </p>
+            <div class="item-actions">
+
+              <!-- Cancel Button-->
+              <% if (order.status === "pending" && item.status !== "cancelled") { %>
+               <form action="/user/order-details/<%= order.customId %>/cancel-item/<%= item.product._id %>" method="POST" class="cancel-item-form" data-product-name="<%= item.product.productName %>" >
+                 <input type="hidden" name="productId" value="<%= item.product._id %>" />
+                 <div class="action-box">
+                 <button type="submit" class="cancel-btn">Cancel Item</button>
+                 <textarea name="cancelReason" placeholder="Optional: Reason" rows="1" cols="25"></textarea><br>
+                </div>
+                </form>
+              <% } else if (item.status === "cancelled") { %>
+                <span class="item-status cancelled">(Item Cancelled)</span>
+                <% } %>
+
+             <!-- Return Button-->
+              <% if ( item.status === 'delivered'  && item.status !== "cancelled" && item.returnStatus !== 'return-requested' && item.returnStatus !== 'returned') { %>
+                <form class="return-item-form" action="/user/order-details/<%= order.customId %>/return/<%= item.product._id %>" method="post">
+                  <div class="action-box">
+                <textarea name="returnReason" placeholder="Reason for return" rows="3"></textarea><br>
+                <button type="submit" class="return-btn">Request Return</button>
+                </div>
+                 </form>
+                 <% } %>
+
+                <% if (item.returnStatus === "return-requested") { %>
+                  <span class="item-status return-pending">(Return Requested)</span>
+                <% } else if (item.status === 'returned') { %>
+                    <span class="item-status returned">(Item returned and the amount refunded to your wallet)</span>
+                    
+                <% } else if (item.returnStatus === 'return-denied') { %>
+                <p class="info return-rejected">(Return Rejected)</p>
+                <% if (item.returnDenyReason && item.returnDenyReason.trim()) { %>
+                  <p class="deny-reason"><strong>Reason:</strong> <%= item.returnDenyReason %></p>
+                <% } %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      <% }) %>
+      </div>
+
+      <!-- RIGHT: Summary + Shipping + Download -->
+      <div class="order-right">
+        <div class="shipping-details">
+          <h4>Shipping Address</h4>
+          <% if (order.address) { %>
+          <p><%= order.address.fullName %></p>
+          <p><%= order.address.street %>, <%= order.address.city %></p>
+          <p><%= order.address.state %> , <%= order.address.country %> , <%= order.address.pincode %></p>
+          <p>Phone: <%= order.address.phone %></p>
+          <% } else { %>
+            <p>No shipping address found.</p>
+          <% } %>
+        </div>
+
+        <div class="price-summary">
+          <h4>Price Summary</h4>
+          <div class="line">
+            <span>Subtotal:</span><span><%= order.subtotal.toLocaleString('en-IN') %></span>
+          </div>
+          <div class="line">
+            <span>Discount:</span><span>₹<%= order.discount %></span>
+          </div>
+          <div class="line">
+            <span>Tax:10%</span><span>₹<%= order.tax.toLocaleString('en-IN') %></span>
+          </div>
+          <div class="line">
+            <span>Shipping:</span><span><%= order.shippingCharge === 0 ? "Free" : `₹${order.shippingCharge}` %></span>
+          </div>
+          <div class="line total">
+            <span>Grand Total:</span><span>₹<%= order.grandTotal.toLocaleString('en-IN') %></span>
+          </div>
+        </div>
+        
+        <div class="right-buttons">
+          <% if( order.status !== 'cancelled' && order.status !== 'returned' && order.status !== 'failed') { %>
+          <a href="/user/order/<%= order.customId %>/invoice">
+            <button title="Download Invoice" class="download-btn">Download Invoice (PDF)</button>
+          </a>
+          <% } %>
+
+          <% if (order.status === "pending") { %>
+            <form id="cancel-order-form" action="/user/order-details/<%= order.customId %>/cancel-order" method="POST" onsubmit="return confirmCancelOrder()">
+            <button class="cancel-order-btn">Cancel Entire Order</button>
+            <textarea name="cancelReason" placeholder="Optional: Reason for cancellation" rows="2" cols="30"></textarea><br>
+            </form>
+          <% } %>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <%- include("../../views/partials/user/footer") %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+  document.querySelectorAll('.cancel-item-form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const productName = form.getAttribute('data-product-name');
+       const actionUrl = form.getAttribute('action');
+
+      Swal.fire({
+        title: `Cancel ${productName}?`,
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!'
+      }).then( async (result) => {
+        if (result.isConfirmed) {
+          const formData = new FormData(form);
+
+          const response = await fetch(actionUrl, {
+            method: "POST",
+            body: formData
+          });
+
+          const data = await response.json();
+
+          Swal.fire({
+            icon: data.success ? 'success' : 'error',
+            title: data.success ? 'Success!' : 'Failed!',
+            text: data.message,
+            confirmButtonColor: '#3085d6'
+          }).then(()=> {
+            if(data.success) window.location.reload();
+          });
+        }
+      });
+    });
+  });
+
+  const cancelOrderForm = document.getElementById('cancel-order-form');
+  if (cancelOrderForm) {
+    cancelOrderForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const actionUrl = cancelOrderForm.getAttribute('action');
+
+      Swal.fire({
+        title: 'Cancel the entire order?',
+        text: "All items will be marked as cancelled.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel all'
+      }).then( async (result) => {
+        if (result.isConfirmed) {
+          const formData = new FormData(cancelOrderForm);
+          const response = await fetch(actionUrl, {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+
+          Swal.fire({
+            icon: data.success ? 'success' : 'error',
+            title: data.success ? 'Success!' : 'Failed!',
+            text: data.message,
+            confirmButtonColor: '#3085d6'
+          }).then(()=> {
+            if( data.success) window.location.reload();
+          });
+        }
+      });
+    });
+  }
+
+  document.querySelectorAll('.return-item-form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const reason = form.querySelector('textarea[name="returnReason"]').value.trim();
+      if (!reason) {
+        Swal.fire('Error', 'Please enter a reason for return.', 'error');
+        return;
+      }
+
+      Swal.fire({
+        title: 'Request Return?',
+        text: "This will send your return request.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Request',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          form.submit();
+        }
+      });
+    });
+  });
+
+</script>
+
+</body>
+</html>

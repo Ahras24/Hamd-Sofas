@@ -1,0 +1,133 @@
+/* Shared container styles */
+.offer-container {
+  padding: 30px;
+  background-color: #e8e3dd;
+  font-family: 'Segoe UI', sans-serif;
+  color: #2B2B2B;
+  margin-left: 300px;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  margin-right: 30px;
+}
+
+/* Section wrappers */
+.product-offer-section,
+.category-offer-section {
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Headings */
+.product-offer-section h2,
+.category-offer-section h2 {
+  font-size: 22px;
+  margin-bottom: 18px;
+  border-left: 6px solid #9CAEA9;
+  padding-left: 12px;
+  color: #2B2B2B;
+}
+
+/* Form layout */
+.offer-form {
+  display: flex;
+  flex-wrap: nowrap; /* Prevent wrapping */
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  flex: 1; /* Allow all groups to shrink and grow equally */
+}
+
+.input-group input,
+.input-group select {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  width: 100%;
+}
+
+.input-group button {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: #9CAEA9;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.input-group button:hover {
+  background-color: #7d9890;
+}
+
+.input-group .error {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+  height: 14px;
+}
+
+.input-group label {
+  font-size: 13px;
+  margin-bottom: 5px;
+  margin-top: -24px;
+  color: #2B2B2B;
+  font-weight: 500;
+}
+
+/* Table styles */
+.offer-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.offer-table th,
+.offer-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.offer-table th {
+  background-color: #9CAEA9;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Delete button */
+.delete-btn {
+  background-color: #e63946;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background-color: #c92836;
+}
+
+/* Validation error text */
+.error {
+  color: red;
+  font-size: 12px;
+  display: block;
+  margin-top: -8px;
+  margin-bottom: 8px;
+}

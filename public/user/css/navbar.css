@@ -1,0 +1,134 @@
+
+  /* Navbar */
+  .navbar {
+    background-color: #9CAEA9;
+    color: #fff;
+    padding: 20px 40px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: bold;
+  }
+
+  .navbar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .brand-and-menu {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .navbar-brand {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .menu-box {
+    background-color: #B7C2BB;
+    padding: 12px 88px;
+    border-radius: 10px;
+    width: 40vw;
+    
+    display: flex;           /* Add this */
+    flex-wrap: nowrap;       /* Prevent wrapping */
+    align-items: center;     /* Center vertically */
+    gap: 50px;               /* Space between items (instead of margin-right) */
+  }
+
+  .menu-box a {
+    text-decoration: none;
+    color: #222;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+
+  .menu-box a:hover {
+    color: #585829;
+    transform: scale(1.05);
+  }
+
+  .navbar-actions {
+    display: flex;
+    gap: 30px;
+  }
+
+.navbar-actions .action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #2d2d2d;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  position: relative;
+}
+
+  .navbar-actions .action-item:hover {
+    color: #585829;
+    transform: scale(1.05);
+  }
+
+  .navbar-actions .action-item i {
+    font-size: 20px;
+    display: block;
+    margin-bottom: 5px;
+    color: #99774d;
+    transition: color 0.3s ease;
+  }
+
+  .navbar-actions .action-item:hover i {
+    color: #585829;
+  }
+
+
+/* Wrapper to position badge on top of icon */
+.icon-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  margin: 0 auto 5px; /* Center and space from label */
+}
+
+.icon-wrapper i {
+  font-size: 22px;
+  color: #99774d;
+}
+
+/* Badge */
+.count-badge {
+  position: absolute;
+  top: -9px;
+  right: -22px;
+  background: #b4b4b4;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 30%;
+  box-shadow: 0 0 4px rgba(0,0,0,0.2);
+  line-height: 1;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Label under the icon */
+.action-label {
+  text-align: center;
+  font-size: 13px;
+  color: #2d2d2d;
+  font-weight: bold;
+  text-transform: uppercase;
+}

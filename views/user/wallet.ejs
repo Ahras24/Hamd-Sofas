@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Page</title>
+    <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+    <link rel="stylesheet" href="/public/user/css/wallet.css">
+</head>
+<body>
+
+  <% if (!isAjax) { %>
+    <%- include("../partials/user/navbar") %>
+
+<div class="wallet-wrapper">
+    <div class="wallet-left">
+      <h1>My Wallet</h1>
+      <img src="/public/images/wallet.icon.jpg" alt="Wallet Icon" class="wallet-image" />
+      <div class="wallet-balance-card">
+        <p class="balance-label">Available Balance</p>
+        <h2>₹<%= balance.toLocaleString('en-IN') %>/-</h2>
+        <button class="add-money-btn">+ Add Money</button>
+      </div>
+    </div>
+    
+    <div class="wallet-right" id="transaction-section">
+  <% } %>
+      <h3>Transaction History</h3>
+      <% if (transactions.length === 0) { %>
+        <p class="no-transactions">No transactions yet.</p>
+      <% } else { %>
+        <table class="transaction-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Reason</th>
+              <th>Order ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% transactions.forEach(txn => { %>
+              <tr class="<%= txn.type === 'credit' ? 'credit' : 'debit' %>">
+                <td><%= new Date(txn.date).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) %></td>
+                <td><%= txn.type.charAt(0).toUpperCase() + txn.type.slice(1) %></td>
+                <td class="amount">
+                  ₹<%= txn.amount.toLocaleString('en-IN') %>
+                </td>
+                <td><%= txn.reason || '-' %></td>
+                <td><%= txn.orderId || '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+
+        <div class="pagination">
+        <% if( currentPage > 1) { %>
+          <a href="#" data-page="<%= currentPage - 1 %>">« Prev</a> 
+        <% } %>  
+
+        <% for (let i=1; i<= totalPages; i++) { %> 
+          <a href="#" data-page="<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+        <%  } %>
+
+        <% if ( currentPage < totalPages ) { %> 
+          <a href="#" data-page="<%= currentPage + 1 %>">Next »</a>
+        <% } %>
+      </div>
+
+      <% if (!isAjax) { %>
+        </div>
+  </div>
+
+   <%- include("../partials/user/footer") %>
+
+   <script>
+
+    document.addEventListener('click',function (e) {
+      if(e.target.matches(".pagination a")) {
+        e.preventDefault();
+        const page = e.target.dataset.page;
+
+        fetch(`/user/wallet?page=${page}`, {
+          headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById("transaction-section").innerHTML = html;
+        })
+        .catch(error => console.error("pagination load failed: ",error))
+      }
+    });
+
+   </script>
+   <% } %>
+    
+
+</body>
+</html>
+
+

@@ -1,0 +1,180 @@
+.admin-main {
+  margin-left: 240px; /* Adjust this based on your sidebar width */
+  padding: 2rem;
+  background-color: #e8e3dd;
+  min-height: 100vh;
+  color: #2B2B2B;
+}
+
+/* Page title */
+.admin-page-title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #2B2B2B;
+}
+
+/* Orders table */
+.admin-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.admin-orders-table th,
+.admin-orders-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+  font-size: 0.95rem;
+   border: 1px solid #ccc; 
+}
+
+.admin-orders-table th {
+  background-color: #9CAEA9;
+  color: white;
+}
+
+/* Status badge */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  display: inline-block;
+}
+
+.status-badge.pending {
+  background-color: #fbc02d;  /* Amber - warm yellow for pending */
+}
+
+.status-badge.shipped {
+  background-color: #039be5;  /* Light Blue - represents transit */
+}
+
+.status-badge.out-for-delivery {
+  background-color: #ff9800;  /* Orange - active delivery */
+}
+
+.status-badge.delivered {
+  background-color: #4caf50;  /* Green - successful */
+}
+
+.status-badge.cancelled {
+  background-color: #e53935;  /* Deep Red - error/stop */
+}
+
+.status-badge.return-requested {
+  background-color: #ffb300;  /* Amber - indicates attention */
+}
+
+.status-badge.return-denied {
+  background-color: #d32f2f;  /* Strong Red - denial */
+}
+
+.status-badge.returned {
+  background-color: #5c6bc0;  /* Indigo - completed return */
+}
+
+/* View button */
+.view-btn {
+  padding: 6px 12px;
+  background-color: #9CAEA9;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+.view-btn:hover {
+  background-color: #7f9993;
+}
+
+/* No orders message */
+.no-orders-msg {
+  margin-top: 2rem;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #666;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .admin-main {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .admin-orders-table {
+    font-size: 0.85rem;
+  }
+
+  .admin-orders-table th, .admin-orders-table td {
+    padding: 0.6rem;
+  }
+
+  .view-btn {
+    font-size: 0.8rem;
+  }
+}
+
+.filter-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.filter-form input, .filter-form select {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 220px;
+}
+
+.filter-form button, .clear-btn {
+  padding: 6px 12px;
+  background-color: #9CAEA9;
+  color: #2B2B2B;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filter-form .clear-btn {
+  background-color: #ccc;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.pagination {
+  margin-top: 1rem;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+.pagination a {
+  padding: 6px 10px;
+  margin: 0 4px;
+  text-decoration: none;
+  background-color: #e8e3dd;
+  color: #2B2B2B;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.pagination a.active {
+  background-color: #9CAEA9;
+  font-weight: bold;
+}
+
+.back-btn {
+  padding: 8px;
+  color: #2B2B2B;
+  background-color: #605e5d;
+  text-decoration: none;
+}

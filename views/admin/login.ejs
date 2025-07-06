@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login</title>
+  <link rel="icon" type="image/png" href="/public/images/admin-favicon.jpg">
+  <link rel="stylesheet" href="/public/admin/css/login.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+
+        <!-- Navbar -->
+        <div style="position:fixed; top:0; left:0; width:100%; height:60px; background:#9caea9; display:flex; justify-content:center; align-items:center; font-size:26px; font-weight:bold;">
+          HAMD SOFAS
+        </div>
+  
+
+  <!-- Login Form Section -->
+  <div class="container">
+    <div class="login-box">
+      <h2>Admin Login</h2>
+
+      
+  <% if (errorMessage) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= errorMessage %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% } %>
+
+      <!-- Login Form -->
+      <form action="/admin/login" method="post">
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input value="ahrazmohammed6@gmail.com" type="email" id="email" name="email" placeholder="Enter your email"  />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input value="123456" type="password" id="password" name="password" placeholder="Enter your password"  />
+        </div>
+
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+
+
+  
+</body>
+</html>

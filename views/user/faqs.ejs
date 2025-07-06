@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FAQs Page</title>
+  <link rel="icon" type="image/png" href="/public/images/favicon.jpg">
+  <link rel="stylesheet" href="/public/user/css/faqs.css">
+  <style>
+    
+  </style>
+</head>
+<body>
+
+    <%- include("../../views/partials/user/navbar")%>
+
+  <div class="content-wrapper">
+    <header>Frequently Asked Questions</header>
+
+    <div class="faq-container">
+      <div class="faq-item">
+        <h3>What types of sofas do you offer?</h3>
+        <p>We offer a wide variety including sectionals, loveseats, recliners, and sofa beds in various materials and styles.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Can I customize my sofa?</h3>
+        <p>Yes, you can choose fabric, size, color, and even leg style on selected products.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>What is the delivery timeline?</h3>
+        <p>Delivery typically takes 5–10 business days depending on your location and product availability.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Do you offer returns or exchanges?</h3>
+        <p>Yes, we offer a 7-day return policy if the product is unused and in original condition.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>How can I contact customer support?</h3>
+        <p>You can reach us through our contact page or call us at +91-9746528503.</p>
+      </div>
+    </div>
+  </div>
+
+  <%- include("../../views/partials/user/footer")%>
+
+  <script>
+    const faqItems = document.querySelectorAll('.faq-item h3');
+    faqItems.forEach((item) => {
+      item.addEventListener('click', () => {
+        item.parentElement.classList.toggle('active');
+      });
+    });
+  </script>
+
+</body>
+</html>
