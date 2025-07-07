@@ -30,7 +30,7 @@
 
 - **Frontend:** HTML, CSS, JavaScript, EJS Templates
 - **Backend:** Node.js, Express.js
-- **Database:** MongoDB + Mongoose
+- **Database:** MongoDB
 - **Authentication:** Session, Cookies
 - **Cloud:** Cloudinary (for image storage)
 - **Payment Gateway:** Razorpay
