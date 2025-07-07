@@ -63,7 +63,7 @@ app.use('/user',userRoutes);
 
 
 // Global error handler (for 404,500,etc.)
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
     console.error(`Global error: ${err.message}`);
     const status = err.statusCode || 500;
     const message = err.message || "Something went wrong.";
