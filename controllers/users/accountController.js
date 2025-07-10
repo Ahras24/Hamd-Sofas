@@ -1,4 +1,3 @@
-const { profile } = require('console');
 const User = require('../../models/usersModel');
 const Address = require('../../models/addressModel')
 const {sendOTPToEmail, verifyOTP} = require('../../utils/sendOTP')
