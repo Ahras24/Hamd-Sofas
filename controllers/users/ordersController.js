@@ -283,7 +283,7 @@ const downloadInvoice = async(req,res)=>{
 
     const filePath = path.join(__dirname, '../../views/user/invoice.ejs');
 
-    // 1. Render EJS template to HTML
+   // 1. Render EJS template to HTML
     ejs.renderFile(filePath, { order }, (err, html) => {
       if (err) {
         console.error('EJS Render Error:', err);
