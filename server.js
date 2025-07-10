@@ -60,8 +60,6 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/admin',adminRoutes);
 app.use('/user',userRoutes);
 
-
-
 // Global error handler (for 404,500,etc.)
 app.use((err, req, res, next) => {
   console.error(`Global error: ${err.message}`);

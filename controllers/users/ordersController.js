@@ -1,7 +1,7 @@
 const Order = require('../../models/ordersModel');
 const Wallet = require('../../models/walletModel');
 const ejs = require('ejs');
-const pdf = require('html-pdf');
+const puppeteer = require('puppeteer');
 const path = require('path');
 const { findOneAndUpdate } = require('../../models/categoryModel');
 
@@ -282,18 +282,28 @@ const downloadInvoice = async(req,res)=>{
 
     const filePath = path.join(__dirname, '../../views/user/invoice.ejs');
 
-    ejs.renderFile(filePath, { order }, (err, html) => {
-      if (err) return res.status(500).send('Error rendering invoice');
+    const html = await ejs.renderFile(filePath, { order });
 
-      const options = { format: 'A4' };
-
-      pdf.create(html, options).toStream((err, stream) => {
-        if (err) return res.status(500).send('Error generating PDF');
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.customId}.pdf`);
-        stream.pipe(res);
-      });
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
+    const page = await browser.newPage();
+
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+    });
+
+    await browser.close();
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=invoice-${order.customId}.pdf`
+    );
+    res.send(pdfBuffer);
 
     } catch (error) {
         console.error("Error generating invoice:", error);
