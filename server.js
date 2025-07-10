@@ -63,17 +63,18 @@ app.use('/user',userRoutes);
 
 
 // Global error handler (for 404,500,etc.)
-app.use((err, req, res) => {
-    console.error(`Global error: ${err.message}`);
-    const status = err.statusCode || 500;
-    const message = err.message || "Something went wrong.";
+app.use((err, req, res, next) => {
+  console.error(`Global error: ${err.message}`);
+  const status = err.statusCode || 500;
+  const message = err.message || "Something went wrong.";
 
-    res.status(status).render('user/error',{
-      statusCode: status,
-      errorMessage: message,
-      path: req.originalUrl
-    });
+  res.status(status).render('user/error', {
+    statusCode: status,
+    errorMessage: message,
+    path: req.originalUrl
   });
+});
+
 
 
 app.listen(PORT,()=> console.log(`Server running on PORT : ${PORT} `))
