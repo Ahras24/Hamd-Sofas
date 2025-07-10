@@ -281,26 +281,37 @@ const downloadInvoice = async(req,res)=>{
 
           if (!order) return res.status(404).send('Order not found');
 
-    const filePath = path.resolve(__dirname, '../../views/user/invoice.ejs');
+    const filePath = path.join(__dirname, '../../views/user/invoice.ejs');
 
+    // 1. Render EJS template to HTML
     ejs.renderFile(filePath, { order }, (err, html) => {
       if (err) {
-        console.error('EJS render error:', err);
+        console.error('EJS Render Error:', err);
         return res.status(500).send('Error rendering invoice');
       }
 
-      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+      // 2. Create PDF document
+      const doc = new PDFDocument({ size: 'A4', margin: 40 });
+
+      // 3. Set headers
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader(
         'Content-Disposition',
         `attachment; filename=invoice-${order.customId}.pdf`
       );
+
+      // 4. Pipe PDF to response
       doc.pipe(res);
 
-      // Basic usage: you can also use a PDF converter like `html-to-pdfkit` or manually draw using doc.text()
-      doc.text(html, {
-        align: 'left',
-      });
+      // 5. Add HTML manually
+      const cheerio = require('cheerio');
+      const $ = cheerio.load(html);
+
+      // Manually extract content and write to PDF
+      doc.fontSize(18).text('Invoice', { align: 'center' }).moveDown();
+
+      const textContent = $('body').text();
+      doc.fontSize(10).text(textContent);
 
       doc.end();
     });
