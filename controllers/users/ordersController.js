@@ -1,8 +1,9 @@
 const Order = require('../../models/ordersModel');
 const Wallet = require('../../models/walletModel');
 const ejs = require('ejs');
-const puppeteer = require('puppeteer');
+const PDFDocument = require('pdfkit');
 const path = require('path');
+const fs = require('fs');
 const { findOneAndUpdate } = require('../../models/categoryModel');
 
 
@@ -280,30 +281,29 @@ const downloadInvoice = async(req,res)=>{
 
           if (!order) return res.status(404).send('Order not found');
 
-    const filePath = path.join(__dirname, '../../views/user/invoice.ejs');
+    const filePath = path.resolve(__dirname, '../../views/user/invoice.ejs');
 
-    const html = await ejs.renderFile(filePath, { order });
+    ejs.renderFile(filePath, { order }, (err, html) => {
+      if (err) {
+        console.error('EJS render error:', err);
+        return res.status(500).send('Error rendering invoice');
+      }
 
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=invoice-${order.customId}.pdf`
+      );
+      doc.pipe(res);
+
+      // Basic usage: you can also use a PDF converter like `html-to-pdfkit` or manually draw using doc.text()
+      doc.text(html, {
+        align: 'left',
+      });
+
+      doc.end();
     });
-    const page = await browser.newPage();
-
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-    });
-
-    await browser.close();
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename=invoice-${order.customId}.pdf`
-    );
-    res.send(pdfBuffer);
 
     } catch (error) {
         console.error("Error generating invoice:", error);
